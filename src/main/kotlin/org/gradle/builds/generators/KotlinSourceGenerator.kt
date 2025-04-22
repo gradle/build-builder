@@ -30,7 +30,7 @@ class KotlinSourceGenerator : ProjectComponentSpecificGenerator<HasKotlinSource>
             it.println("        if (!visited) {")
             for (reference in kotlinClass.referencedClasses) {
                 val referencedClass = reference.target
-                val varName = referencedClass.simpleName.toLowerCase()
+                val varName = referencedClass.simpleName.lowercase()
                 it.println("            val $varName = ${referencedClass.name}()")
                 it.println("            $varName.doSomething()")
             }

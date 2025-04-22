@@ -2,7 +2,7 @@ plugins {
     id("java")
     id("groovy")
     id("application")
-    kotlin("jvm") version "1.7.10"
+    kotlin("jvm") version "2.1.20"
 }
 
 repositories {
@@ -32,7 +32,7 @@ dependencies {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
+    sourceCompatibility = JavaVersion.VERSION_17
 }
 
 application {
