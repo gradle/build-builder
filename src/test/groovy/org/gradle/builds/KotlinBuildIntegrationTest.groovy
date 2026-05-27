@@ -13,7 +13,7 @@ class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["kotlin-stdlib-1.3.41.jar", "kotlin-stdlib-jdk8-1.3.41.jar", "kotlin-stdlib-common-1.3.41.jar", "kotlin-stdlib-jdk7-1.3.41.jar", "annotations-13.0.jar", "testApp.jar"] as Set
+        app.libDir.list() as Set == ["kotlin-stdlib-2.3.21.jar", "kotlin-stdlib-jdk7-2.3.21.jar", "kotlin-stdlib-jdk8-2.3.21.jar", "annotations-13.0.jar", "testApp.jar"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -37,7 +37,7 @@ class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["kotlin-stdlib-1.3.41.jar", "kotlin-stdlib-jdk8-1.3.41.jar", "kotlin-stdlib-common-1.3.41.jar", "kotlin-stdlib-jdk7-1.3.41.jar", "annotations-13.0.jar", "testApp.jar", "libapi.jar", "libcore.jar"] as Set
+        app.libDir.list() as Set == ["kotlin-stdlib-2.3.21.jar", "kotlin-stdlib-jdk7-2.3.21.jar", "kotlin-stdlib-jdk8-2.3.21.jar", "annotations-13.0.jar", "testApp.jar", "libapi.jar", "libcore.jar"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
