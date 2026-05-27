@@ -1,0 +1,14 @@
+version: 2
+
+x-defaults: &defaults
+  directory: "/"
+  schedule:
+    interval: "weekly"
+  cooldown:
+    default-days: 7
+
+updates:
+  - <<: *defaults
+    package-ecosystem: "gradle"
+  - <<: *defaults
+    package-ecosystem: "github-actions"
