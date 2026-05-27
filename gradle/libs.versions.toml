@@ -5,7 +5,7 @@ jspecify = "1.0.0"
 kotlin = "2.3.21"
 picocli = "4.7.7"
 slf4j = "2.0.18"
-spock = "2.4-groovy-3.0"
+spock = "2.4-groovy-4.0"
 
 # Coordinates emitted by the generators into generated build.gradle files.
 # The `generator-` prefix is the contract with GeneratorVersionsTask in
