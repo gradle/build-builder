@@ -10,8 +10,8 @@ public class BlockWithRepositories extends Scope {
         return repositories;
     }
 
-    public void jcenter() {
-        repositories.add(new ScriptBlock("jcenter"));
+    public void mavenCentral() {
+        repositories.add(new ScriptBlock("mavenCentral"));
     }
 
     public void google() {

@@ -35,7 +35,7 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
         BuildScript buildScript = project.getBuildScript();
         buildScript.requirePlugin("application");
         addDependencies(project, application, buildScript);
-        buildScript.property("mainClassName", mainClass.getName());
+        buildScript.block("application").property("mainClass", mainClass.getName());
 
         addSource(project, application, mainClass, javaClass -> {
         });
@@ -71,6 +71,6 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
 
-        buildScript.dependsOnExternal("testCompile", "junit:junit:4.12");
+        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.13.2");
     }
 }
