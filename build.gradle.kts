@@ -2,7 +2,7 @@ plugins {
     id("java")
     id("groovy")
     id("application")
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.3.21"
 }
 
 repositories {
