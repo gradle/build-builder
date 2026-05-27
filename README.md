@@ -33,6 +33,14 @@ Generates an HTML file that shows the dependencies between builds and projects.
 
 ## Command line usage
 
+### Requirements
+
+- Java 25 — build-builder's own Gradle daemon runs on a Java 25 toolchain (pinned by `gradle/gradle-daemon-jvm.properties`). Gradle auto-provisions if not installed locally.
+- Generated builds are pinned to Gradle 9.x via the wrapper they emit; the wrapper handles its own download.
+- Android SDK + AGP 8 dependencies — only needed when generating and running Android samples. CI provisions via `android-actions/setup-android@v3` (`platforms;android-34 build-tools;34.0.0`).
+- Swift toolchain — only needed when generating and running Swift samples. CI provisions via `swift-actions/setup-swift@v2`.
+- Boost headers + system library — only needed for the C++ `--boost` generator scenario. CI provisions via `apt-get install libboost-dev libboost-system-dev`.
+
 ### Installation
 
 Run `./gradlew installDist` to build and install into `build/install/build-builder`.
