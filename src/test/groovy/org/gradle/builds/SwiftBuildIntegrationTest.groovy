@@ -3,10 +3,6 @@ package org.gradle.builds
 import spock.lang.Unroll
 
 class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
-    def setup() {
-        gradleVersion = "5.4.1"
-    }
-
     def "can generate single project build"() {
         when:
         new Main().run("swift", "--dir", projectDir.absolutePath)
