@@ -17,7 +17,7 @@ public abstract class JvmModelAssembler<A extends Component, L extends Component
     @Override
     protected void rootProject(Settings settings, Project rootProject) {
         BlockWithProjectTarget allProjects = rootProject.getBuildScript().allProjects();
-        allProjects.jcenter();
+        allProjects.mavenCentral();
         addIdePlugins(rootProject);
     }
 

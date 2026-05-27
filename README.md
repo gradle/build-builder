@@ -6,8 +6,8 @@ Supported build types:
 
 - Java application
 - Android application
-- C++ application (Gradle 4.2 and later)
-- Swift application (Gradle 4.5 and later)
+- C++ application
+- Swift application
 
 Generates one or more projects with source files. Can also be used to add source files to an existing skeleton build.
 The source files have dependencies between each other, as described below.
@@ -133,7 +133,6 @@ Here's an example:
     - Not available for Swift
     - Dependencies used by 'impl' class only, and this project uses all libraries from the repo directly rather than some set of API libraries
     - Coordinates collide with previous generated libraries, should generate unique-ish coordinates each time
-    - Publishing to the repo is broken
 - Composite builds
     - Doesn't generate a library project with `--projects 1` (the default)
     - Dependencies used by 'impl' class only, and this project uses all libraries from the repo directly rather than some set of API libraries

@@ -35,7 +35,7 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
         BuildScript buildScript = project.getBuildScript();
         buildScript.requirePlugin("application");
         addDependencies(project, application, buildScript);
-        buildScript.property("mainClassName", mainClass.getName());
+        buildScript.block("application").property("mainClass", mainClass.getName());
 
         addSource(project, application, mainClass, javaClass -> {
         });
@@ -49,11 +49,12 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             buildScript.property("group", group);
             buildScript.property("version", version);
             if (project.getPublicationTarget().getHttpRepository() != null) {
-                buildScript.requirePlugin("maven");
-                ScriptBlock deployerBlock = buildScript.block("uploadArchives").block("repositories").block("mavenDeployer");
-                deployerBlock.statement(
-                        "repository(url: new URI('" + project.getPublicationTarget().getHttpRepository().getRootDir().toUri() + "'))");
-                buildScript.statement("task publish(dependsOn: uploadArchives)");
+                buildScript.requirePlugin("maven-publish");
+                ScriptBlock publishing = buildScript.block("publishing");
+                publishing.block("publications").statement("mavenJava(MavenPublication) { from components.java }");
+                ScriptBlock mavenRepo = publishing.block("repositories").block("maven");
+                mavenRepo.property("url", project.getPublicationTarget().getHttpRepository().getRootDir().toUri().toString());
+                mavenRepo.statement("allowInsecureProtocol = true");
             }
         }
     }
@@ -71,6 +72,6 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
 
-        buildScript.dependsOnExternal("testCompile", "junit:junit:4.12");
+        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.13.2");
     }
 }

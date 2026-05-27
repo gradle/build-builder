@@ -13,7 +13,7 @@ class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        baseNames(app.libDir.list()) == ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "kotlin-stdlib-common", "annotations", "testApp"] as Set
+        baseNames(app.libDir.list()) == ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "annotations", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -37,7 +37,7 @@ class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        baseNames(app.libDir.list()) == ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "kotlin-stdlib-common", "annotations", "testApp", "libapi", "libcore"] as Set
+        baseNames(app.libDir.list()) == ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "annotations", "testApp", "libapi", "libcore"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
