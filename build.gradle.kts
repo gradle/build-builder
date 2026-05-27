@@ -16,10 +16,6 @@ dependencies {
     implementation(libs.kotlin.stdlib)
 
     runtimeOnly(libs.slf4j.simple)
-
-    testImplementation(gradleTestKit())
-    testImplementation(libs.spock.core)
-    testImplementation(libs.junit)
 }
 
 java {
@@ -30,6 +26,20 @@ application {
     mainClass.set("org.gradle.builds.Main")
 }
 
-tasks.named<Test>("test") {
-    maxParallelForks = 2
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useSpock(libs.versions.spock)
+            dependencies {
+                implementation(gradleTestKit())
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        maxParallelForks = 2
+                    }
+                }
+            }
+        }
+    }
 }
