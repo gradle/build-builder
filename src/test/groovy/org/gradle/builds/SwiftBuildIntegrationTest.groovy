@@ -24,7 +24,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         rootProject.dependsOn()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
     }
@@ -50,7 +50,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         libProject.dependsOn()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
     }
@@ -65,7 +65,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.rootProject.isSwiftApplication()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
 
@@ -92,7 +92,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.project(":libcore").isSwiftLibrary()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
 
@@ -123,7 +123,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.file("Tests/libTests").list() as Set == ["LibTest.swift", "LibImplApiTest.swift", "LibImplCoreTest.swift"] as Set
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
     }
@@ -149,7 +149,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
 
         build.buildSucceeds(":installDebug")
 
-        def app = build.app("build/install/main/debug/testApp")
+        def app = build.app("build/install/main/debug/TestApp")
         app.succeeds()
 
         build.buildSucceeds("build")
