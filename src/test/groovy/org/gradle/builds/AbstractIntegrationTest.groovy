@@ -72,7 +72,11 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         CommandHandle start() {
-            assert binFile.isFile()
+            File parent = binFile.parentFile
+            String contents = parent.exists()
+                ? (parent.listFiles()?.collect { it.name + (it.directory ? "/" : "") }?.toString() ?: "<empty>")
+                : "<missing>"
+            assert binFile.isFile() : "Expected binary at ${binFile}, but it does not exist. Parent dir listing: ${contents}"
             return owner.start(this)
         }
 
