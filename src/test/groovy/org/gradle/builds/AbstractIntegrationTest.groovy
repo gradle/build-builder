@@ -241,8 +241,18 @@ abstract class AbstractIntegrationTest extends Specification {
         void isEmptyProject() {
             isProject()
             def text = buildFile.text
-            // Could find a better way to verify this
-            assert !text.contains('java') && !text.contains('application') && !text.contains('swift') && !text.contains('android') && !text.contains('cpp')
+            // Match exact `apply plugin: '<id>'` strings — naive substring matches
+            // collide with legitimate plugins on the root project (e.g. swiftpm-export
+            // matched 'swift', maven-publish does not but kotlin-* style ids would).
+            def forbidden = [
+                'java', 'application', 'kotlin',
+                'cpp-application', 'cpp-library',
+                'swift-application', 'swift-library',
+                'com.android.application', 'com.android.library'
+            ]
+            forbidden.each { p ->
+                assert !text.contains("apply plugin: '${p}'") : "Project unexpectedly applies plugin '${p}'"
+            }
         }
 
         void containsFilesWithExtension(File dir, String extension) {

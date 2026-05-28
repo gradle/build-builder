@@ -95,10 +95,12 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             buildScript.property("group", group);
             buildScript.property("version", version);
             if (project.getPublicationTarget().getHttpRepository() != null) {
-                buildScript.requirePlugin("maven");
-                ScriptBlock deployerBlock = buildScript.block("uploadArchives").block("repositories").block("mavenDeployer");
-                deployerBlock.statement("repository(url: new URI('" + project.getPublicationTarget().getHttpRepository().getRootDir().toUri() + "'))");
-                buildScript.statement("task publish(dependsOn: uploadArchives)");
+                buildScript.requirePlugin("maven-publish");
+                ScriptBlock publishing = buildScript.block("publishing");
+                publishing.block("publications").statement("mavenJava(MavenPublication) { from components.release }");
+                ScriptBlock mavenRepo = publishing.block("repositories").block("maven");
+                mavenRepo.property("url", project.getPublicationTarget().getHttpRepository().getRootDir().toUri().toString());
+                mavenRepo.statement("allowInsecureProtocol = true");
             }
         }
     }
