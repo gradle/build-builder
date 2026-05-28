@@ -30,7 +30,7 @@ class SwiftBuildSourceDepsIntegrationTest extends AbstractIntegrationTest {
 
         build.buildSucceeds(":installDebug")
 
-        def app = build.app("build/install/main/debug/testApp")
+        def app = build.app("build/install/main/debug/TestApp")
         app.succeeds()
 
         build.buildSucceeds("build")
