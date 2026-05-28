@@ -27,8 +27,14 @@ public class AndroidManifestGenerator extends ProjectComponentSpecificSingleFile
         }
         printWriter.println("  >");
         for (JavaClass javaClass : component.getActivities()) {
-            printWriter.println("    <activity android:name='" + javaClass.getName() + "'>");
-            if (component instanceof AndroidApplication) {
+            // Android 12+ requires android:exported on any activity that has an
+            // intent filter. We emit only activities with launcher intent filters
+            // for AndroidApplication, so always mark them exported.
+            boolean hasIntentFilter = component instanceof AndroidApplication;
+            printWriter.println("    <activity");
+            printWriter.println("        android:name='" + javaClass.getName() + "'");
+            printWriter.println("        android:exported='" + hasIntentFilter + "'>");
+            if (hasIntentFilter) {
                 printWriter.println("      <intent-filter>");
                 printWriter.println("        <action android:name='android.intent.action.MAIN'/>");
                 printWriter.println("        <category android:name='android.intent.category.LAUNCHER'/>");

@@ -45,6 +45,8 @@ public class AndroidComponent extends HasJavaSource<JvmLibraryApi> implements Ha
 
     @Override
     public int getMinHeapMegabytes() {
-        return 100;
+        // AGP 8.x routinely needs ~1.5GB for assembleDebug on a trivial app; the
+        // previous 100MB was set against AGP 3.4 and is now an immediate OOM.
+        return 2048;
     }
 }

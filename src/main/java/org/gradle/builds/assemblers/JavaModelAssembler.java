@@ -61,7 +61,9 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
 
     private void addJavaVersion(JavaLibrary library, BuildScript buildScript) {
         if (library.getTargetJavaVersion() != null) {
-            buildScript.property("sourceCompatibility", library.getTargetJavaVersion());
+            // Top-level `sourceCompatibility = ...` was removed in Gradle 9; it
+            // now lives on the `java {}` extension.
+            buildScript.block("java").property("sourceCompatibility", library.getTargetJavaVersion());
         }
     }
 

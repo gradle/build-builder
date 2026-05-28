@@ -76,6 +76,11 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
         configBlock.property("versionCode", 1);
         configBlock.property("versionName", "1.0.0");
         configBlock.property("testInstrumentationRunner", "androidx.test.runner.AndroidJUnitRunner");
+        if (project.getPublicationTarget() != null) {
+            // AGP 8 requires explicit opt-in for the maven-publish `release`
+            // SoftwareComponent that the publishing block consumes.
+            androidBlock.block("publishing").statement("singleVariant('release') { withSourcesJar() }");
+        }
 
         addSourceFiles(project, androidLibrary, libraryActivity, rClass);
         addTests(project, androidLibrary);
@@ -95,7 +100,11 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             buildScript.property("version", version);
             if (project.getPublicationTarget().getHttpRepository() != null) {
                 buildScript.requirePlugin("maven-publish");
-                ScriptBlock publishing = buildScript.block("publishing");
+                // The `release` SoftwareComponent only exists after AGP has
+                // processed the android { publishing { singleVariant(...) } }
+                // block, so the publication wiring must run in afterEvaluate.
+                ScriptBlock afterEvaluate = buildScript.block("afterEvaluate");
+                ScriptBlock publishing = afterEvaluate.block("publishing");
                 publishing.block("publications").statement("mavenJava(MavenPublication) { from components.release }");
                 ScriptBlock mavenRepo = publishing.block("repositories").block("maven");
                 mavenRepo.property("url", project.getPublicationTarget().getHttpRepository().getRootDir().toUri().toString());
@@ -114,8 +123,9 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
         buildScript.dependsOnExternal("testImplementation", "junit:junit:4.13.2");
-        buildScript.dependsOnExternal("androidTestImplementation", "androidx.annotation:annotation:1.7.0");
-        buildScript.dependsOnExternal("androidTestImplementation", "androidx.test:runner:1.5.2");
+        // androidx.test:runner pins its own annotation version transitively; do not
+        // pin annotation here or we hit strict-constraint conflicts.
+        buildScript.dependsOnExternal("androidTestImplementation", "androidx.test:runner:1.6.2");
     }
 
     @Override
