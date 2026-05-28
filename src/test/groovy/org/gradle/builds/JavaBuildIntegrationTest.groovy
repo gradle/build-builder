@@ -165,13 +165,13 @@ class JavaBuildIntegrationTest extends AbstractIntegrationTest {
 
         def rootProject = build.rootProject.isJavaApplication()
 
-        def child1 = build(file("childapi"))
+        def child1 = build(file("childApi"))
         child1.isBuild()
         child1.rootProject.isEmptyProject()
         def child1lib1 = child1.project(":childapilibapi").isJavaLibrary()
         def child1lib2 = child1.project(":childapilibcore").isJavaLibrary()
 
-        def child2 = build(file("childcore"))
+        def child2 = build(file("childCore"))
         child2.isBuild()
         child2.rootProject.isEmptyProject()
         def child2lib1 = child2.project(":childcorelibapi").isJavaLibrary()

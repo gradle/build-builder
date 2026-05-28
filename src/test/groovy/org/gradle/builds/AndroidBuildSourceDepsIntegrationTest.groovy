@@ -10,13 +10,13 @@ class AndroidBuildSourceDepsIntegrationTest extends AbstractAndroidIntegrationTe
 
         def rootProject = build.rootProject.isAndroidApplication()
 
-        def child1 = build(file("external/sourceapi"))
+        def child1 = build(file("external/sourceApi"))
         child1.isBuild()
         child1.rootProject.isEmptyProject()
         def child1lib1 = child1.project(":srcapilibapi").isAndroidLibrary()
         def child1lib2 = child1.project(":srcapilibcore").isAndroidLibrary()
 
-        def child2 = build(file("external/sourcecore"))
+        def child2 = build(file("external/sourceCore"))
         child2.isBuild()
         child2.rootProject.isEmptyProject()
         def child2lib1 = child2.project(":srccorelibapi").isAndroidLibrary()
