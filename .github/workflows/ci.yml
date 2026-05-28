@@ -20,5 +20,8 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
+      - uses: swift-actions/setup-swift@v2
+      - name: Install C++ Boost (headers + system runtime library)
+        run: sudo apt-get update && sudo apt-get install -y libboost-dev libboost-system-dev
       - uses: gradle/actions/setup-gradle@v6
       - run: ./gradlew build
