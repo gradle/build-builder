@@ -26,6 +26,11 @@ public class SwiftModelAssembler extends LanguageSpecificProjectConfigurer<Swift
         buildScript.requirePlugin("swift-application", "4.5");
         buildScript.requirePlugin("xctest");
         addDependencies(project, application, buildScript);
+        // Pin Swift 5 language mode so the generated trivial Swift sources
+        // compile under both Swift 5 and Swift 6 toolchains. Swift 6 added
+        // strict concurrency checks and other source-breaking changes; the
+        // -swift-version 5 flag is still accepted by Swift 6 compilers.
+        buildScript.block("application").statement("sourceCompatibility = SwiftVersion.SWIFT5");
         if (application.isSwiftPm()) {
             buildScript.block("application").property("source.from", new Scope.Code("rootProject.file('Sources/" + project.getName() + "')"));
         }
@@ -46,6 +51,9 @@ public class SwiftModelAssembler extends LanguageSpecificProjectConfigurer<Swift
         buildScript.requirePlugin("xctest");
         addPublishing(project, project.getBuildScript());
         addDependencies(project, library, buildScript);
+        // Same Swift 5 language mode pin as the application case — keeps
+        // generated libraries compatible with both 5.x and 6.x toolchains.
+        buildScript.block("library").statement("sourceCompatibility = SwiftVersion.SWIFT5");
         if (library.isSwiftPm()) {
             buildScript.block("library").property("source.from", new Scope.Code("rootProject.file('Sources/" + project.getName() + "')"));
         }
