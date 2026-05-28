@@ -15,8 +15,9 @@ public class AndroidManifestGenerator extends ProjectComponentSpecificSingleFile
     @Override
     protected void generate(ConfiguredProject project, AndroidComponent component, PrintWriter printWriter) {
         printWriter.println("<!-- GENERATED SOURCE FILE -->");
-        printWriter.println("<manifest xmlns:android='http://schemas.android.com/apk/res/android'");
-        printWriter.println("        package='" + component.getPackageName() + "'>");
+        // AGP 8 requires the package to be declared via the `namespace` DSL on
+        // the android extension (set in AndroidModelAssembler), not the manifest.
+        printWriter.println("<manifest xmlns:android='http://schemas.android.com/apk/res/android'>");
         printWriter.println("  <application");
         if (component.getLabelResource() != null) {
             printWriter.println("    android:label='@string/" + component.getLabelResource() + "'");

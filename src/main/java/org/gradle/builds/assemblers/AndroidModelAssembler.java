@@ -6,7 +6,7 @@ import java.util.Collections;
 
 public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication, AndroidLibrary> {
     public static final String defaultVersion = "8.10.0";
-    private static final PublishedLibrary<JavaLibraryApi> supportUtils = new PublishedLibrary<>("support-core-utils", new ExternalDependencyDeclaration("com.android.support:support-core-utils:25.1.0"), new JavaLibraryApi("support-core-utils", Collections.singletonList(JavaClassApi.field("android.support.v4.app.NavUtils", "PARENT_ACTIVITY"))));
+    private static final PublishedLibrary<JavaLibraryApi> supportUtils = new PublishedLibrary<>("support-core-utils", new ExternalDependencyDeclaration("androidx.legacy:legacy-support-core-utils:1.0.0"), new JavaLibraryApi("support-core-utils", Collections.singletonList(JavaClassApi.field("androidx.core.app.NavUtils", "PARENT_ACTIVITY"))));
     private final String pluginVersion;
 
     public AndroidModelAssembler(String pluginVersion) {
@@ -18,9 +18,6 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
     protected void rootProject(Settings settings, Project rootProject) {
         super.rootProject(settings, rootProject);
         BuildScript buildScript = rootProject.getBuildScript();
-        if (pluginVersion.startsWith("2.5.")) {
-            buildScript.buildScriptBlock().mavenLocal();
-        }
         buildScript.buildScriptBlock().google();
         buildScript.buildScriptBlock().mavenCentral();
         buildScript.requireOnBuildScriptClasspath("com.android.tools.build:gradle:" + pluginVersion);
@@ -44,14 +41,15 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
         addApplicationResources(androidApplication);
 
         ScriptBlock androidBlock = buildScript.block("android");
-        androidBlock.property("compileSdkVersion", 26);
+        androidBlock.property("namespace", androidApplication.getPackageName());
+        androidBlock.property("compileSdk", 34);
         ScriptBlock configBlock = androidBlock.block("defaultConfig");
         configBlock.property("applicationId", androidApplication.getPackageName());
-        configBlock.property("minSdkVersion", 21);
-        configBlock.property("targetSdkVersion", 26);
+        configBlock.property("minSdk", 21);
+        configBlock.property("targetSdk", 34);
         configBlock.property("versionCode", 1);
         configBlock.property("versionName", "1.0.0");
-        configBlock.property("testInstrumentationRunner", "android.support.test.runner.AndroidJUnitRunner");
+        configBlock.property("testInstrumentationRunner", "androidx.test.runner.AndroidJUnitRunner");
 
         addSourceFiles(project, androidApplication, appActivity, rClass);
         addTests(project, androidApplication);
@@ -70,13 +68,14 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
         addDependencies(project, androidLibrary, buildScript);
 
         ScriptBlock androidBlock = buildScript.block("android");
-        androidBlock.property("compileSdkVersion", 26);
+        androidBlock.property("namespace", androidLibrary.getPackageName());
+        androidBlock.property("compileSdk", 34);
         ScriptBlock configBlock = androidBlock.block("defaultConfig");
-        configBlock.property("minSdkVersion", 21);
-        configBlock.property("targetSdkVersion", 26);
+        configBlock.property("minSdk", 21);
+        configBlock.property("targetSdk", 34);
         configBlock.property("versionCode", 1);
         configBlock.property("versionName", "1.0.0");
-        configBlock.property("testInstrumentationRunner", "android.support.test.runner.AndroidJUnitRunner");
+        configBlock.property("testInstrumentationRunner", "androidx.test.runner.AndroidJUnitRunner");
 
         addSourceFiles(project, androidLibrary, libraryActivity, rClass);
         addTests(project, androidLibrary);
@@ -114,9 +113,9 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             }
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
-        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.12");
-        buildScript.dependsOnExternal("androidTestImplementation", "com.android.support:support-annotations:25.1.0");
-        buildScript.dependsOnExternal("androidTestImplementation", "com.android.support.test:runner:0.5");
+        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.13.2");
+        buildScript.dependsOnExternal("androidTestImplementation", "androidx.annotation:annotation:1.7.0");
+        buildScript.dependsOnExternal("androidTestImplementation", "androidx.test:runner:1.5.2");
     }
 
     @Override
