@@ -15,7 +15,7 @@ class GradlePluginModelAssembler : ComponentSpecificProjectConfigurer<GradlePlug
         val id = component.id!!
         val pos = id.lastIndexOf(".")
         val baseName = id.substring(pos + 1)
-        val impl = project.qualifiedNamespaceFor + '.' + baseName.capitalize() + "Plugin"
+        val impl = project.qualifiedNamespaceFor + '.' + baseName.replaceFirstChar { it.uppercaseChar() } + "Plugin"
         component.implClass = JavaClass(impl)
 
         val block = buildScript.block("gradlePlugin").block("plugins").block(baseName)
