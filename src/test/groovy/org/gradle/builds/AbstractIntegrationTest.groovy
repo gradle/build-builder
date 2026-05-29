@@ -96,10 +96,17 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         void waitFor() {
-            process.waitFor()
+            // Bound the wait. A generated app that hangs (e.g. a Swift
+            // launcher with a broken runtime) used to wedge the suite
+            // until the CI 6-hour job cap killed everything.
+            if (!process.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)) {
+                process.destroyForcibly()
+                forwarder.join()
+                throw new AssertionFailedError("Generated app did not exit within 120s")
+            }
             forwarder.join()
             if (process.exitValue() != 0) {
-                throw new AssertionFailedError("Build failed")
+                throw new AssertionFailedError("Generated app failed with exit code ${process.exitValue()}")
             }
         }
 
