@@ -3,7 +3,8 @@ package org.gradle.builds.model;
 import org.gradle.builds.assemblers.ComposableProjectInitializer;
 import org.gradle.builds.assemblers.Settings;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
+
 import java.nio.file.Path;
 import java.util.LinkedHashSet;
 import java.util.Set;

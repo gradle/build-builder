@@ -12,6 +12,7 @@ repositories {
 dependencies {
     implementation(libs.picocli)
     implementation(libs.jgit)
+    implementation(libs.jspecify)
     implementation(libs.kotlin.stdlib)
 
     runtimeOnly(libs.slf4j.simple)
