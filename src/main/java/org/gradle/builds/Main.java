@@ -341,8 +341,8 @@ public class Main implements Runnable {
 
     @Command(name = "android", description = "Generates an Android build with source files", mixinStandardHelpOptions = true)
     public static class InitAndroidBuild extends InitBinaryDependencyAwareBuild {
-        @Option(names = "--version", description = "Android plugin version (default: " + AndroidModelAssembler.defaultVersion + ")")
-        String androidVersion = AndroidModelAssembler.defaultVersion;
+        @Option(names = "--version", description = "Android plugin version (default: " + GeneratorVersions.AGP_VERSION + ")")
+        String androidVersion = GeneratorVersions.AGP_VERSION;
 
         @Option(names = "--java", description = "Include some Java libraries (default: false)")
         boolean includeJavaLibraries = false;

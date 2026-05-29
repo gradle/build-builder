@@ -1,12 +1,13 @@
 package org.gradle.builds.assemblers
 
+import org.gradle.builds.generators.GeneratorVersions
 import org.gradle.builds.model.*
 
 class KotlinModelAssembler : LanguageSpecificProjectConfigurer<KotlinApplication, KotlinLibrary>(KotlinApplication::class.java, KotlinLibrary::class.java) {
     override fun rootProject(settings: Settings, project: Project) {
         val buildScript = project.buildScript
         buildScript.buildScriptBlock().mavenCentral()
-        buildScript.requireOnBuildScriptClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
+        buildScript.requireOnBuildScriptClasspath(GeneratorVersions.KOTLIN_GRADLE_PLUGIN)
         buildScript.allProjects().mavenCentral()
     }
 

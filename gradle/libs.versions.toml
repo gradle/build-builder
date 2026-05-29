@@ -5,7 +5,14 @@ kotlin = "2.3.21"
 picocli = "4.7.7"
 slf4j = "2.0.18"
 spock = "2.4-groovy-3.0"
+
+# Versions for coordinates emitted by the generators into generated build.gradle files.
+generator-agp = "8.10.0"
+generator-androidx-legacy-support-core-utils = "1.0.0"
 generator-androidx-test-ext-junit = "1.2.1"
+generator-androidx-test-runner = "1.6.2"
+generator-junit4 = "4.13.2"
+generator-slf4j = "2.0.18"
 
 [libraries]
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
@@ -14,7 +21,17 @@ kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
+
+# Generator-emitted dependencies. These are NOT consumed by build-builder instead
+# they are code-generated into GeneratorVersions.java at build time.
+generator-agp = { module = "com.android.tools.build:gradle", version.ref = "generator-agp" }
+generator-androidx-legacy-support-core-utils = { module = "androidx.legacy:legacy-support-core-utils", version.ref = "generator-androidx-legacy-support-core-utils" }
 generator-androidx-test-ext-junit = { module = "androidx.test.ext:junit", version.ref = "generator-androidx-test-ext-junit" }
+generator-androidx-test-runner = { module = "androidx.test:runner", version.ref = "generator-androidx-test-runner" }
+generator-junit4 = { module = "junit:junit", version.ref = "generator-junit4" }
+generator-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+generator-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "generator-slf4j" }
+generator-slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "generator-slf4j" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

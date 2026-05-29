@@ -3,6 +3,7 @@ plugins {
     id("groovy")
     id("application")
     alias(libs.plugins.kotlin.jvm)
+    id("build-builder.generator-versions")
 }
 
 repositories {

@@ -1,5 +1,6 @@
 package org.gradle.builds.assemblers;
 
+import org.gradle.builds.generators.GeneratorVersions;
 import org.gradle.builds.model.*;
 
 public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaLibrary> {
@@ -9,7 +10,7 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
 
     @Override
     protected void library(Settings settings, Project project, JavaLibrary library) {
-        project.requires(slfj4);
+        project.requires(slf4j);
 
         JavaClass apiClass = library.getApiClass();
 
@@ -26,8 +27,8 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
 
     @Override
     protected void application(Settings settings, Project project, JavaApplication application) {
-        project.requires(slfj4);
-        project.requires(slfj4Simple);
+        project.requires(slf4j);
+        project.requires(slf4jSimple);
 
         JavaClass mainClass = application.addClass(project.getQualifiedNamespaceFor() + "." + project.getTypeNameFor());
         mainClass.addRole(new AppEntryPoint());
@@ -72,6 +73,6 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
 
-        buildScript.dependsOnExternal("testImplementation", JUNIT_DEPENDENCY);
+        buildScript.dependsOnExternal("testImplementation", GeneratorVersions.JUNIT4);
     }
 }

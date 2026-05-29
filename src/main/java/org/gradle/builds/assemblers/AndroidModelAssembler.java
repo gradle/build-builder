@@ -1,27 +1,17 @@
 package org.gradle.builds.assemblers;
 
+import org.gradle.builds.generators.GeneratorVersions;
 import org.gradle.builds.model.*;
 
 import java.util.Collections;
 
 public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication, AndroidLibrary> {
-    /**
-     * Default Android Gradle Plugin coordinate emitted into the generated
-     * build.gradle. Surfaced as the default value of build-builder's
-     * {@code android --version} CLI option in {@link org.gradle.builds.Main}.
-     * Update together with {@link #ANDROIDX_LEGACY_SUPPORT_CORE_UTILS} /
-     * {@link #ANDROIDX_TEST_RUNNER} when bumping AGP.
-     */
-    public static final String defaultVersion = "8.10.0";
-    private static final String ANDROIDX_LEGACY_SUPPORT_CORE_UTILS = "androidx.legacy:legacy-support-core-utils:1.0.0";
-    private static final String ANDROIDX_ANNOTATION = "androidx.annotation:annotation:1.7.0";
-    private static final String ANDROIDX_TEST_RUNNER = "androidx.test:runner:1.6.2";
     private static final int COMPILE_SDK = 34;
     private static final int MIN_SDK = 21;
     private static final int TARGET_SDK = 34;
     private static final PublishedLibrary<JavaLibraryApi> supportUtils = new PublishedLibrary<>(
             "support-core-utils",
-            new ExternalDependencyDeclaration(ANDROIDX_LEGACY_SUPPORT_CORE_UTILS),
+            new ExternalDependencyDeclaration(GeneratorVersions.ANDROIDX_LEGACY_SUPPORT_CORE_UTILS),
             new JavaLibraryApi("support-core-utils", Collections.singletonList(JavaClassApi.field("androidx.core.app.NavUtils", "PARENT_ACTIVITY"))));
     private final String pluginVersion;
 
@@ -42,8 +32,8 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
 
     @Override
     protected void application(Settings settings, Project project, AndroidApplication androidApplication) {
-        project.requires(slfj4);
-        project.requires(slfj4Simple);
+        project.requires(slf4j);
+        project.requires(slf4jSimple);
         project.requires(supportUtils);
         JavaClassApi rClass = JavaClassApi.field(androidApplication.getPackageName() + ".R.string", project.getName().toLowerCase() + "_string");
 
@@ -73,7 +63,7 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
 
     @Override
     protected void library(Settings settings, Project project, AndroidLibrary androidLibrary) {
-        project.requires(slfj4);
+        project.requires(slf4j);
         JavaClassApi rClass = JavaClassApi.field(androidLibrary.getPackageName() + ".R.string", project.getName().toLowerCase() + "_string");
 
         JavaClass libraryActivity = androidLibrary.getActivity();
@@ -136,10 +126,8 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             }
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
-        buildScript.dependsOnExternal("testImplementation", JUNIT_DEPENDENCY);
-        // androidx.test:runner pins its own annotation version transitively; do not
-        // pin annotation here or we hit strict-constraint conflicts.
-        buildScript.dependsOnExternal("androidTestImplementation", ANDROIDX_TEST_RUNNER);
+        buildScript.dependsOnExternal("testImplementation", GeneratorVersions.JUNIT4);
+        buildScript.dependsOnExternal("androidTestImplementation", GeneratorVersions.ANDROIDX_TEST_RUNNER);
         buildScript.dependsOnExternal("androidTestImplementation", GeneratorVersions.ANDROIDX_TEST_EXT_JUNIT);
     }
 
