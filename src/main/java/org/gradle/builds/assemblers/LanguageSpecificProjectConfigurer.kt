@@ -35,6 +35,6 @@ abstract class LanguageSpecificProjectConfigurer<A : Component, L : Component>(v
     }
 
     protected fun capitalize(s: String): String {
-        return s.capitalize()
+        return s.replaceFirstChar { it.uppercaseChar() }
     }
 }

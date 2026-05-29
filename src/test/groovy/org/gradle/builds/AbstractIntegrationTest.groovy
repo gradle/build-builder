@@ -1,42 +1,33 @@
 package org.gradle.builds
 
 import groovy.io.FileType
-import junit.framework.AssertionFailedError
+import org.opentest4j.AssertionFailedError
 import org.eclipse.jgit.api.Git
 import org.eclipse.jgit.storage.file.FileRepositoryBuilder
 import org.gradle.testkit.runner.GradleRunner
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
+import spock.lang.TempDir
 
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
 abstract class AbstractIntegrationTest extends Specification {
-    @Rule
-    TemporaryFolder tmpDir = new TemporaryFolder(getRootTempDir())
-    static File rootTmpDir
+    private static final File SHARED_TESTKIT_DIR = new File("build/tmp/tests/testkit").canonicalFile.tap { mkdirs() }
+
+    @TempDir
+    File tmpDir
     File projectDir
     File userHomeDir
     String gradleVersion = "5.0"
     BuildLayout build
 
-    static File getRootTempDir() {
-        if (rootTmpDir == null) {
-            def file = new File("build/tmp/tests").canonicalFile
-            file.mkdirs()
-            rootTmpDir = file
-        }
-        return rootTmpDir
-    }
-
     def setup() {
-        projectDir = tmpDir.newFolder("generated-root-dir")
+        projectDir = new File(tmpDir, "generated-root-dir").tap { mkdirs() }
         build = new BuildLayout(projectDir)
     }
 
     void useIsolatedUserHome() {
-        userHomeDir = tmpDir.newFolder("user-home")
+        userHomeDir = new File(tmpDir, "user-home").tap { mkdirs() }
     }
 
     File file(String path) {
@@ -201,7 +192,7 @@ abstract class AbstractIntegrationTest extends Specification {
         void buildSucceeds(String... tasks) {
             def gradleRunner = GradleRunner.create()
             gradleRunner.withGradleVersion(gradleVersion)
-            gradleRunner.withTestKitDir(userHomeDir ?: new File(rootTempDir, "testkit"))
+            gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
             gradleRunner.withProjectDir(rootDir)
             gradleRunner.withArguments(["-S"] + (tasks as List))
             gradleRunner.forwardOutput()

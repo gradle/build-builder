@@ -87,7 +87,12 @@ public class GitRepoGenerator implements Generator<BuildTree<ConfiguredBuild>> {
                 }
                 addCommand.call();
 
-                git.commit().setMessage("Initial version").call();
+                git.commit()
+                        .setAuthor("build-builder", "build-builder@gradle.com")
+                        .setCommitter("build-builder", "build-builder@gradle.com")
+                        .setSign(false)
+                        .setMessage("Initial version")
+                        .call();
                 git.tagDelete().setTags(repo.getVersion()).call();
                 git.tag().setName(repo.getVersion()).call();
             }
