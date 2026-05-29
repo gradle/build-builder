@@ -88,11 +88,9 @@ abstract class AbstractIntegrationTest extends Specification {
 
     static class CommandHandle {
         final Process process
-        final Thread forwarder
 
-        CommandHandle(Process process, Thread forwarder) {
+        CommandHandle(Process process) {
             this.process = process
-            this.forwarder = forwarder
         }
 
         void waitFor() {
@@ -101,10 +99,8 @@ abstract class AbstractIntegrationTest extends Specification {
             // until the CI 6-hour job cap killed everything.
             if (!process.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)) {
                 process.destroyForcibly()
-                forwarder.join()
                 throw new AssertionFailedError("Generated app did not exit within 120s")
             }
-            forwarder.join()
             if (process.exitValue() != 0) {
                 throw new AssertionFailedError("Generated app failed with exit code ${process.exitValue()}")
             }
@@ -113,7 +109,6 @@ abstract class AbstractIntegrationTest extends Specification {
         void kill() {
             process.destroy()
             process.waitFor()
-            forwarder.join()
         }
     }
 
@@ -180,36 +175,37 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         CommandHandle start(List<String> commandLine) {
+            // Redirect to a file rather than buffering subprocess stdout in a
+            // forwarder thread. The Swift multi-project tests can produce
+            // hundreds of MB of compiler/linker output and the previous
+            // implementation held all of it in the test JVM, eventually
+            // pinning a fork at the heap ceiling.
+            File outFile = new File(rootDir, "build-builder-output.log")
             def builder = new ProcessBuilder(commandLine)
             builder.directory(rootDir)
             builder.environment().put("JAVA_HOME", System.getProperty("java.home"))
             builder.redirectErrorStream(true)
-            def process = builder.start()
-            def forwarder = new Thread() {
-                @Override
-                void run() {
-                    def buffer = new byte[1024]
-                    while (true) {
-                        int nread = process.inputStream.read(buffer)
-                        if (nread < 0) {
-                            break;
-                        }
-                        System.out.write(buffer, 0, nread)
-                    }
-                }
-            }
-            forwarder.start()
-            return new CommandHandle(process, forwarder)
+            builder.redirectOutput(outFile)
+            return new CommandHandle(builder.start())
         }
 
         void buildSucceeds(String... tasks) {
-            def gradleRunner = GradleRunner.create()
-            gradleRunner.withGradleVersion(gradleVersion)
-            gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
-            gradleRunner.withProjectDir(rootDir)
-            gradleRunner.withArguments(["-S"] + (tasks as List))
-            gradleRunner.forwardOutput()
-            gradleRunner.build()
+            // Stream the TestKit child's stdout/stderr to per-build files so
+            // long-running invocations (Swift multi-project compile,
+            // installDist on a 20-project Cpp build, etc.) do not balloon
+            // the test JVM heap via gradleRunner.forwardOutput().
+            File outFile = new File(rootDir, "build-builder-build.log")
+            outFile.parentFile?.mkdirs()
+            new FileWriter(outFile, true).withWriter { writer ->
+                def gradleRunner = GradleRunner.create()
+                gradleRunner.withGradleVersion(gradleVersion)
+                gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
+                gradleRunner.withProjectDir(rootDir)
+                gradleRunner.withArguments(["-S"] + (tasks as List))
+                gradleRunner.forwardStdOutput(writer)
+                gradleRunner.forwardStdError(writer)
+                gradleRunner.build()
+            }
         }
     }
 
