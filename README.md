@@ -17,7 +17,7 @@ Generates XCTest unit tests for Swift projects.
 
 Can optionally generate a composite build.
 
-Can optionally generate a build that uses dependencies from a local HTTP repository. Also generates an HTTP server for this repository.
+Can optionally generate a build that uses dependencies from a local HTTP repository. The HTTP server is embedded in the consumer build as a Gradle `BuildService` started during settings evaluation, binding an ephemeral port persisted to `.gradle/http-repo-port`.
 
 Can optionally generate a build with source dependencies.
 
@@ -49,7 +49,14 @@ The `--source-files` option specifies the number of source files per project. De
 
 The `--included-builds` option specifies the number of additional included builds to generate. Set to greater than 0 to generate a composite build. Default is 0.
 
-The `--http-repo` option generates an additional build that produces an HTTP Maven repository that provides external libraries. This repository and its classes are referenced by the generated build. Use `gradle -p repo-server run` to build the libraries and start the HTTP server. Not available for Swift builds.
+The `--http-repo` option generates external library builds whose artifacts are published to a local `http-repo/` directory and consumed over an embedded HTTP server. To exercise the generated build end-to-end, run two invocations:
+
+```
+./gradlew :publishHttpRepo       # publishes the external libraries into http-repo/
+./gradlew :installDist           # or :installDebug / :assembleDebug for the consumer
+```
+
+Two invocations are required: the C++ (`cpp-application`) and Android (`com.android.application`) plugins resolve runtime configurations during task-graph realization, which is earlier than any in-graph task ordering can ensure publishing has finished. Not available for Swift builds.
 
 The `--http-repo-libraries` option specifies the number of libraries to include in the HTTP repository. Default is 3.
 

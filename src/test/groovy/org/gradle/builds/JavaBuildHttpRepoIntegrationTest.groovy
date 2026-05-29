@@ -29,8 +29,9 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         lib2.dependsOn(lib3)
         lib3.dependsOn()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
+        build.buildSucceeds(":publishHttpRepo")
+        build.buildSucceeds(":installDist")
+
         file("http-repo/org/gradle/example/extlibcore/1.0.0/extlibcore-1.0.0.pom").file
         file("http-repo/org/gradle/example/extlibcore/1.0.0/extlibcore-1.0.0.jar").file
         file("http-repo/org/gradle/example/extlibapi2/1.0.0/extlibapi2-1.0.0.pom").file
@@ -38,20 +39,12 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.pom").file
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.jar").file
 
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
-        build.buildSucceeds(":installDist")
-
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
         baseNames(app.libDir.list()) == ["extlibapi1", "extlibapi2", "extlibcore", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
     def "can generate single project build with http repo with single library"() {
@@ -73,16 +66,11 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         rootProject.dependsOn(lib)
         lib.dependsOn()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
+        build.buildSucceeds(":publishHttpRepo")
+        build.buildSucceeds(":installDist")
 
         file("http-repo/org/gradle/example/ext/1.0.0/ext-1.0.0.pom").file
         file("http-repo/org/gradle/example/ext/1.0.0/ext-1.0.0.jar").file
-
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
-        build.buildSucceeds(":installDist")
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
@@ -90,9 +78,6 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         app.succeeds()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
     def "can generate multi-project build with http repo"() {
@@ -122,15 +107,11 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         extlib2.dependsOn(extlib3)
         extlib3.dependsOn()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
+        build.buildSucceeds(":publishHttpRepo")
+        build.buildSucceeds(":installDist")
+
         file("http-repo/org/gradle/example/extlibcore/1.0.0/extlibcore-1.0.0.pom").file
         file("http-repo/org/gradle/example/extlibcore/1.0.0/extlibcore-1.0.0.jar").file
-
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
-        build.buildSucceeds(":installDist")
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
@@ -138,9 +119,6 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         app.succeeds()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
     def "can generate single project build with http repo with multiple versions"() {
@@ -171,19 +149,15 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         lib2.dependsOn(lib3)
         lib3.dependsOn()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
+        build.buildSucceeds(":publishHttpRepo")
+        build.buildSucceeds(":installDist")
+
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.pom").file
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.jar").file
         file("http-repo/org/gradle/example/extlibapi2/2.0.0/extlibapi2-2.0.0.pom").file
         file("http-repo/org/gradle/example/extlibapi2/2.0.0/extlibapi2-2.0.0.jar").file
         file("http-repo/org/gradle/example/extlibcore/3.0.0/extlibcore-3.0.0.pom").file
         file("http-repo/org/gradle/example/extlibcore/3.0.0/extlibcore-3.0.0.jar").file
-
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
-        build.buildSucceeds(":installDist")
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
@@ -194,9 +168,6 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
         app.succeeds()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
 }

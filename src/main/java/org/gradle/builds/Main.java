@@ -164,7 +164,6 @@ public class Main implements Runnable {
                                     // TODO - remove this
                                     new XCTestInfoPlistGenerator(),
                                     new GradlePluginSourceGenerator(),
-                                    new HttpServerMainGenerator(),
                                     new ReadmeGenerator(),
                                     new GradlePropertiesGenerator(),
                                     new ScenarioFileGenerator())),

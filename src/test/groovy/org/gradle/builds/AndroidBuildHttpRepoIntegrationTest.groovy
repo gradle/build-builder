@@ -25,22 +25,14 @@ class AndroidBuildHttpRepoIntegrationTest extends AbstractAndroidIntegrationTest
         lib2.dependsOn(lib3)
         lib3.dependsOn()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
+        build.buildSucceeds(":publishHttpRepo")
+        build.buildSucceeds(":assembleDebug")
 
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.pom").file
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.aar").file
-
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
-        build.buildSucceeds(":assembleDebug")
         file("build/outputs/apk/debug/testApp-debug.apk").exists()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
     def "can generate multi project build with http repo and Java libraries"() {
@@ -72,8 +64,8 @@ class AndroidBuildHttpRepoIntegrationTest extends AbstractAndroidIntegrationTest
         extlib2.dependsOn(extlib3)
         extlib3.dependsOn()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
+        build.buildSucceeds(":publishHttpRepo")
+        build.buildSucceeds(":assembleDebug")
 
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.aar").file
         file("http-repo/org/gradle/example/extlibapi1/1.0.0/extlibapi1-1.0.0.pom").file
@@ -81,17 +73,9 @@ class AndroidBuildHttpRepoIntegrationTest extends AbstractAndroidIntegrationTest
         file("http-repo/org/gradle/example/extlibapi2/1.0.0/extlibapi2-1.0.0.pom").file
         file("http-repo/org/gradle/example/extlibcore/1.0.0/extlibcore-1.0.0.jar").file
         file("http-repo/org/gradle/example/extlibcore/1.0.0/extlibcore-1.0.0.pom").file
-
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
-        build.buildSucceeds(":assembleDebug")
         file("build/outputs/apk/debug/testApp-debug.apk").exists()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
 }
