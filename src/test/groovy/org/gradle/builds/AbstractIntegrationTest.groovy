@@ -11,6 +11,8 @@ import spock.lang.TempDir
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
+import static java.util.concurrent.TimeUnit.*
+
 abstract class AbstractIntegrationTest extends Specification {
     private static final File SHARED_TESTKIT_DIR = new File("build/tmp/tests/testkit").canonicalFile.tap { mkdirs() }
 
@@ -90,17 +92,27 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         void waitFor() {
-            process.waitFor()
+            if (!process.waitFor(120, SECONDS)) {
+                process.destroyForcibly()
+                process.waitFor(5, SECONDS)
+                forwarder.join()
+                throw new AssertionFailedError("Generated app did not exit within 120s")
+            }
             forwarder.join()
             if (process.exitValue() != 0) {
-                throw new AssertionFailedError("Build failed")
+                throw new AssertionFailedError("Generated app failed with exit code ${process.exitValue()}")
             }
         }
 
         void kill() {
             process.destroy()
-            process.waitFor()
-            forwarder.join()
+            if (!process.waitFor(5, SECONDS)) {
+                forwarder.join()
+                if (!process.waitFor(5, SECONDS)) {
+                    throw new AssertionFailedError("Generated app did not exit within 5s of being killed")
+                }
+                throw new AssertionFailedError("Generated app did not exit within 5s")
+            }
         }
     }
 
