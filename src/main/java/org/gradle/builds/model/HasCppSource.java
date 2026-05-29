@@ -3,12 +3,22 @@ package org.gradle.builds.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HasCppSource extends HasSource<CppSourceFile, CppLibraryApi> {
+public class HasCppSource extends HasSource<CppSourceFile, CppLibraryApi> implements HasHeapRequirements {
     private final List<CppHeaderFile> implHeaders = new ArrayList<>();
     private final List<CppHeaderFile> publicHeaders = new ArrayList<>();
     private final List<CppHeaderFile> privateHeaders = new ArrayList<>();
     private final List<CppHeaderFile> testHeaders = new ArrayList<>();
     private MacroIncludes macroIncludes = MacroIncludes.none;
+
+    @Override
+    public int getMinHeapMegabytes() {
+        // C++ compilation pulls in large header sets (Boost in particular) and
+        // the resulting daemon classpath / metaspace plus parallel compileCpp
+        // workers comfortably exceed the 128 MB default. The value is consumed
+        // by GradlePropertiesGenerator to set org.gradle.jvmargs.
+        return 1024;
+    }
+
 
     public List<CppHeaderFile> getPublicHeaderFiles() {
         return publicHeaders;
