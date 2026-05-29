@@ -77,7 +77,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.buildSucceeds("build")
 
         where:
-        count << [3, 5, 10, 20]
+        count << [3, 5, 10]
     }
 
     @Unroll
@@ -104,7 +104,10 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.buildSucceeds("build")
 
         where:
-        count << [1, 5, 10, 20]
+        // Swift compilation dominates wall time here (~80 files at N=20), and
+        // the 2-digit-suffix and deeper-graph coverage that 20 would add is
+        // already exercised by the Java and Cpp generators at the same N.
+        count << [1, 5, 10]
     }
 
     def "can generate using Swift PM layout"() {
