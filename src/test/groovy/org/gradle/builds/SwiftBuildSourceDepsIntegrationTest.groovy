@@ -1,5 +1,10 @@
 package org.gradle.builds
 
+import spock.lang.IgnoreIf
+
+// @IgnoreIf has to live on the concrete class (Spock does not inherit it from
+// an abstract superclass). See AbstractSwiftIntegrationTest for the rationale.
+@IgnoreIf({ os.macOs })
 class SwiftBuildSourceDepsIntegrationTest extends AbstractSwiftIntegrationTest {
     def "can generate build with source dependencies"() {
         when:
