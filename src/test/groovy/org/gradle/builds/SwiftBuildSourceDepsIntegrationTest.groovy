@@ -1,12 +1,6 @@
 package org.gradle.builds
 
-import spock.lang.IgnoreIf
-
-// Skipped on macOS: Xcode 26.5 + Gradle's incubating swift-* plugins cannot
-// link the generated XCTest executable (missing _main, restricted SwiftUICore).
-// See SwiftBuildIntegrationTest for the full explanation.
-@IgnoreIf({ os.macOs })
-class SwiftBuildSourceDepsIntegrationTest extends AbstractIntegrationTest {
+class SwiftBuildSourceDepsIntegrationTest extends AbstractSwiftIntegrationTest {
     def "can generate build with source dependencies"() {
         when:
         new Main().run("swift", "--dir", projectDir.absolutePath, "--source-dep-builds", "2")
