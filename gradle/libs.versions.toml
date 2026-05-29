@@ -1,4 +1,5 @@
 [versions]
+# build-builder's own dependencies
 jgit = "6.6.1.202309021850-r"
 jspecify = "1.0.0"
 kotlin = "2.3.21"
@@ -6,13 +7,36 @@ picocli = "4.7.7"
 slf4j = "2.0.18"
 spock = "2.4-groovy-3.0"
 
+# Coordinates emitted by the generators into generated build.gradle files.
+# The `generator-` prefix is the contract with GeneratorVersionsTask in
+# build.gradle.kts, which code-generates a Java constants class from these
+# entries so Dependabot can drive the versions without manual sync.
+generator-agp = "8.10.0"
+generator-androidx-legacy-support-core-utils = "1.0.0"
+generator-androidx-test-runner = "1.6.2"
+generator-junit4 = "4.13.2"
+generator-slf4j = "2.0.18"
+
 [libraries]
+# build-builder's own dependencies
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
+
+# Generator-emitted dependencies. These are NOT consumed by build-builder's own
+# classpath — they are surfaced here so Dependabot opens PRs when newer
+# versions land on Maven Central / dl.google.com. The version literals are
+# code-generated into GeneratorVersions.java at compile time.
+generator-agp = { module = "com.android.tools.build:gradle", version.ref = "generator-agp" }
+generator-androidx-legacy-support-core-utils = { module = "androidx.legacy:legacy-support-core-utils", version.ref = "generator-androidx-legacy-support-core-utils" }
+generator-androidx-test-runner = { module = "androidx.test:runner", version.ref = "generator-androidx-test-runner" }
+generator-junit4 = { module = "junit:junit", version.ref = "generator-junit4" }
+generator-kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+generator-slf4j-api = { module = "org.slf4j:slf4j-api", version.ref = "generator-slf4j" }
+generator-slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "generator-slf4j" }
 
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

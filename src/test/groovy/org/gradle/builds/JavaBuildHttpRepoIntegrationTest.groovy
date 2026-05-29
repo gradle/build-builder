@@ -45,7 +45,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["extlibapi1-1.0.0.jar", "extlibapi2-1.0.0.jar", "extlibcore-1.0.0.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        app.libDir.list() as Set == ["extlibapi1-1.0.0.jar", "extlibapi2-1.0.0.jar", "extlibcore-1.0.0.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -86,7 +86,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["ext-1.0.0.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        app.libDir.list() as Set == ["ext-1.0.0.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -134,7 +134,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["extlibapi1-1.0.0.jar", "extlibapi2-1.0.0.jar", "extlibcore-1.0.0.jar", "libapi.jar", "libcore.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        app.libDir.list() as Set == ["extlibapi1-1.0.0.jar", "extlibapi2-1.0.0.jar", "extlibcore-1.0.0.jar", "libapi.jar", "libcore.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -187,7 +187,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["extlibapi1-3.0.0.jar", "extlibapi2-3.0.0.jar", "extlibcore-3.0.0.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        app.libDir.list() as Set == ["extlibapi1-3.0.0.jar", "extlibapi2-3.0.0.jar", "extlibcore-3.0.0.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")

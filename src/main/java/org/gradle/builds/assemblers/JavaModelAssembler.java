@@ -1,5 +1,6 @@
 package org.gradle.builds.assemblers;
 
+import org.gradle.builds.generators.GeneratorVersions;
 import org.gradle.builds.model.*;
 
 public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaLibrary> {
@@ -74,6 +75,6 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
 
-        buildScript.dependsOnExternal("testImplementation", JUNIT_DEPENDENCY);
+        buildScript.dependsOnExternal("testImplementation", GeneratorVersions.JUNIT4);
     }
 }

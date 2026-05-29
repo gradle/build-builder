@@ -34,8 +34,8 @@ class JavaBuildSourceDepsIntegrationTest extends AbstractIntegrationTest {
                 "srcapilibcore-1.0.0.jar",
                 "srccorelibapi-1.0.0.jar",
                 "srccorelibcore-1.0.0.jar",
-                "slf4j-api-1.7.25.jar",
-                "slf4j-simple-1.7.25.jar",
+                "slf4j-api-2.0.18.jar",
+                "slf4j-simple-2.0.18.jar",
                 "testApp.jar"
         ] as Set
         app.succeeds()
