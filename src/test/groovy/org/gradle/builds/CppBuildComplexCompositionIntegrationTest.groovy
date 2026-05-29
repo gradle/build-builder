@@ -17,21 +17,13 @@ class CppBuildComplexCompositionIntegrationTest extends AbstractIntegrationTest 
         build(file('childApi')).isBuild()
         build(file('childCore')).isBuild()
 
-        def serverBuild = build(file('repo-server'))
-        serverBuild.buildSucceeds("installDist")
-
-        def server = serverBuild.app("build/install/repo/bin/repo").start()
-        waitFor(new URI("http://localhost:5005"))
-
+        build.buildSucceeds(":publishHttpRepo")
         build.buildSucceeds(":installDebug")
 
         def app = build.app("build/install/main/debug/testApp")
         app.succeeds()
 
         build.buildSucceeds("build")
-
-        cleanup:
-        server?.kill()
     }
 
 }
