@@ -1,15 +1,8 @@
 package org.gradle.builds
 
-import spock.lang.IgnoreIf
 import spock.lang.Unroll
 
-// Gradle's incubating swift-application / swift-library / xctest plugins do not
-// work with the Xcode 26.5 toolchain: `relocateMainForTest` no longer extracts
-// `_main` for the test executable to link against, and macOS 26's SDK marks
-// SwiftUICore as a restricted framework that only Apple-signed binaries may link
-// to. Run these on Linux CI only — see FOLLOWUP.md.
-@IgnoreIf({ os.macOs })
-class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
+class SwiftBuildIntegrationTest extends AbstractSwiftIntegrationTest {
     def "can generate single project build"() {
         when:
         new Main().run("swift", "--dir", projectDir.absolutePath)

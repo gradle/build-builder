@@ -74,6 +74,6 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
 
-        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.13.2");
+        buildScript.dependsOnExternal("testImplementation", JUNIT_DEPENDENCY);
     }
 }
