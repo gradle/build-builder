@@ -1,6 +1,13 @@
 package org.gradle.builds
 
 class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
+    // Strips a trailing `-<version>.jar` suffix so assertions pin the set of
+    // artifacts present, not their versions (Kotlin and the jetbrains
+    // annotations jar bump independently of this repo).
+    private static Set<String> baseNames(String[] files) {
+        files.collect { it.replaceFirst(/\.jar$/, '').replaceFirst(/-\d[\w.]*$/, '') } as Set
+    }
+
     def "can generate Kotlin application"() {
         when:
         new Main().run("kotlin", "--dir", projectDir.absolutePath)
@@ -13,7 +20,7 @@ class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["kotlin-stdlib-2.3.21.jar", "kotlin-stdlib-jdk7-2.3.21.jar", "kotlin-stdlib-jdk8-2.3.21.jar", "annotations-13.0.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "annotations", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -37,7 +44,7 @@ class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["kotlin-stdlib-2.3.21.jar", "kotlin-stdlib-jdk7-2.3.21.jar", "kotlin-stdlib-jdk8-2.3.21.jar", "annotations-13.0.jar", "testApp.jar", "libapi.jar", "libcore.jar"] as Set
+        baseNames(app.libDir.list()) == ["kotlin-stdlib", "kotlin-stdlib-jdk7", "kotlin-stdlib-jdk8", "annotations", "testApp", "libapi", "libcore"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
