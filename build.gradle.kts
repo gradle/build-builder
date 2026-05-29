@@ -13,7 +13,6 @@ dependencies {
     implementation(libs.airline)
     implementation(libs.jgit)
     implementation(libs.kotlin.stdlib)
-    implementation(libs.kotlin.stdlib.jdk8)
 
     runtimeOnly(libs.slf4j.simple)
 
