@@ -1,16 +1,16 @@
 [versions]
-airline = "0.9"
 jgit = "7.6.0.202603022253-r"
 junit = "4.13.2"
 kotlin = "2.3.21"
+picocli = "4.7.7"
 slf4j = "2.0.18"
 spock = "2.4-groovy-3.0"
 
 [libraries]
-airline = { module = "io.airlift:airline", version.ref = "airline" }
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
 junit = { module = "junit:junit", version.ref = "junit" }
 kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib", version.ref = "kotlin" }
+picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version.ref = "slf4j" }
 spock-core = { module = "org.spockframework:spock-core", version.ref = "spock" }
 

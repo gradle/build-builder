@@ -10,7 +10,7 @@ repositories {
 }
 
 dependencies {
-    implementation(libs.airline)
+    implementation(libs.picocli)
     implementation(libs.jgit)
     implementation(libs.kotlin.stdlib)
 

@@ -1,82 +1,70 @@
 package org.gradle.builds;
 
-import io.airlift.airline.*;
 import org.gradle.builds.assemblers.*;
 import org.gradle.builds.generators.*;
 import org.gradle.builds.model.*;
+import picocli.CommandLine;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.HelpCommand;
+import picocli.CommandLine.Option;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
-public class Main {
+@Command(
+        name = "build-builder",
+        mixinStandardHelpOptions = true,
+        subcommands = {
+                Main.InitJavaBuild.class,
+                Main.InitKotlinBuild.class,
+                Main.InitCppBuild.class,
+                Main.InitAndroidBuild.class,
+                Main.InitSwiftBuild.class,
+                HelpCommand.class
+        }
+)
+public class Main implements Runnable {
     private static final GraphAssembler graphAssembler = new GraphAssembler();
 
     public static void main(String[] args) {
-        try {
-            new Main().run(args);
-        } catch (SettingsNotAvailableException e) {
-            // Reported
-            System.exit(1);
-        } catch (Throwable throwable) {
-            throwable.printStackTrace();
-            System.exit(2);
-        }
-
-        System.exit(0);
+        int exitCode = new CommandLine(new Main()).execute(args);
+        System.exit(exitCode);
     }
 
-    public void run(String[] args) throws Exception {
-        Cli.CliBuilder<Callable<Void>> cliBuilder = new Cli.CliBuilder<>("build-builder");
-        cliBuilder.withCommand(InitJavaBuild.class);
-        cliBuilder.withCommand(InitKotlinBuild.class);
-        cliBuilder.withCommand(InitCppBuild.class);
-        cliBuilder.withCommand(InitAndroidBuild.class);
-        cliBuilder.withCommand(InitSwiftBuild.class);
-        cliBuilder.withCommand(Help.class);
-        cliBuilder.withDefaultCommand(Help.class);
-        Cli<Callable<Void>> cli = cliBuilder.build();
-
-        try {
-            cli.parse(args).call();
-        } catch (ParseException | CommandLineValidationException e) {
-            System.out.println(e.getMessage());
-            System.out.println();
-            Help.help(cli.getMetadata(), Collections.emptyList());
-            throw new SettingsNotAvailableException();
-        }
+    @Override
+    public void run() {
+        CommandLine.usage(this, System.out);
     }
 
-    private static class CommandLineValidationException extends RuntimeException {
-        public CommandLineValidationException(String message) {
-            super(message);
-        }
-    }
-
-    private static class SettingsNotAvailableException extends RuntimeException {
+    // Programmatic entry point used by integration tests; propagates execution
+    // exceptions instead of swallowing them as picocli's default execute() would.
+    public void run(String... args) throws Exception {
+        new CommandLine(this)
+                .setExecutionExceptionHandler((ex, cmd, parseResult) -> { throw ex; })
+                .execute(args);
     }
 
     public static abstract class InitBuild implements Callable<Void> {
-        @Option(name = "--source-files", description = "The number of source files to generate for each project (default: 3)")
+        @Option(names = "--source-files", description = "The number of source files to generate for each project (default: 3)")
         int sourceFiles = 3;
 
-        @Option(name = "--dir", description = "The directory to generate into (default: current directory)")
+        @Option(names = "--dir", description = "The directory to generate into (default: current directory)")
         String rootDir = ".";
 
-        @Option(name = "--projects", description = "The number of projects to include in the build (default: 1)")
+        @Option(names = "--projects", description = "The number of projects to include in the build (default: 1)")
         int projects = 1;
 
-        @Option(name = "--included-builds", description = "The number of included builds to generate (default: 0)")
+        @Option(names = "--included-builds", description = "The number of included builds to generate (default: 0)")
         int builds = 0;
 
-        @Option(name = "--source-dep-builds", description = "The number of source dependency builds to generate (default: 0)")
+        @Option(names = "--source-dep-builds", description = "The number of source dependency builds to generate (default: 0)")
         int sourceDeps = 0;
 
-        @Option(name = "--buildsrc", description = "Generate a buildSrc build? (default: false)")
+        @Option(names = "--buildsrc", description = "Generate a buildSrc build? (default: false)")
         boolean buildSrc;
 
         @Override
@@ -219,13 +207,13 @@ public class Main {
     }
 
     public static abstract class InitBinaryDependencyAwareBuild extends InitBuild {
-        @Option(name = "--http-repo", description = "Generate an HTTP repository (default: false)")
+        @Option(names = "--http-repo", description = "Generate an HTTP repository (default: false)")
         boolean httpRepo = false;
 
-        @Option(name = "--http-repo-libraries", description = "Number of libraries to include in the HTTP repository (default: 3)")
+        @Option(names = "--http-repo-libraries", description = "Number of libraries to include in the HTTP repository (default: 3)")
         int httpRepoLibraries = 3;
 
-        @Option(name = "--http-repo-versions", description = "Number of versions of each library to include in the HTTP repository (default: 1)")
+        @Option(names = "--http-repo-versions", description = "Number of versions of each library to include in the HTTP repository (default: 1)")
         int httpRepoVersions = 1;
 
         @Override
@@ -254,7 +242,7 @@ public class Main {
         }
     }
 
-    @Command(name = "java", description = "Generates a Java build with source files")
+    @Command(name = "java", description = "Generates a Java build with source files", mixinStandardHelpOptions = true)
     public static class InitJavaBuild extends InitBinaryDependencyAwareBuild {
         @Override
         protected String getType() {
@@ -272,7 +260,7 @@ public class Main {
         }
     }
 
-    @Command(name = "kotlin", description = "Generates a Kotlin build with source files")
+    @Command(name = "kotlin", description = "Generates a Kotlin build with source files", mixinStandardHelpOptions = true)
     public static class InitKotlinBuild extends InitBinaryDependencyAwareBuild {
         @Override
         protected String getType() {
@@ -290,15 +278,15 @@ public class Main {
         }
     }
 
-    @Command(name = "cpp", description = "Generates a C++ build with source files")
+    @Command(name = "cpp", description = "Generates a C++ build with source files", mixinStandardHelpOptions = true)
     public static class InitCppBuild extends InitBinaryDependencyAwareBuild {
-        @Option(name = "--header-files", description = "The number of header files to generate for each project (default: 3)")
+        @Option(names = "--header-files", description = "The number of header files to generate for each project (default: 3)")
         int headers = 3;
 
-        @Option(name = "--macro-include", description = "Specifies how headers files should reference other header files (values: none, simple, complex. default: none)")
+        @Option(names = "--macro-include", description = "Specifies how headers files should reference other header files (values: none, simple, complex. default: none)")
         MacroIncludes macroIncludes = MacroIncludes.none;
 
-        @Option(name = "--boost", description = "Include reference to boost libraries (default: false)")
+        @Option(names = "--boost", description = "Include reference to boost libraries (default: false)")
         boolean boost;
 
         @Override
@@ -330,9 +318,9 @@ public class Main {
         }
     }
 
-    @Command(name = "swift", description = "Generates a Swift build with source files")
+    @Command(name = "swift", description = "Generates a Swift build with source files", mixinStandardHelpOptions = true)
     public static class InitSwiftBuild extends InitBuild {
-        @Option(name = "--swift-pm", description = "Use the Swift package manager source layout (default: false)")
+        @Option(names = "--swift-pm", description = "Use the Swift package manager source layout (default: false)")
         boolean swiftPm = false;
 
         @Override
@@ -351,12 +339,12 @@ public class Main {
         }
     }
 
-    @Command(name = "android", description = "Generates an Android build with source files")
+    @Command(name = "android", description = "Generates an Android build with source files", mixinStandardHelpOptions = true)
     public static class InitAndroidBuild extends InitBinaryDependencyAwareBuild {
-        @Option(name = "--version", description = "Android plugin version (default: " + AndroidModelAssembler.defaultVersion + ")")
+        @Option(names = "--version", description = "Android plugin version (default: " + AndroidModelAssembler.defaultVersion + ")")
         String androidVersion = AndroidModelAssembler.defaultVersion;
 
-        @Option(name = "--java", description = "Include some Java libraries (default: false)")
+        @Option(names = "--java", description = "Include some Java libraries (default: false)")
         boolean includeJavaLibraries = false;
 
         @Override
