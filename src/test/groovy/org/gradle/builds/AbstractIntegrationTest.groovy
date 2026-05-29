@@ -84,21 +84,17 @@ abstract class AbstractIntegrationTest extends Specification {
 
     static class CommandHandle {
         final Process process
-        final Thread forwarder
 
-        CommandHandle(Process process, Thread forwarder) {
+        CommandHandle(Process process) {
             this.process = process
-            this.forwarder = forwarder
         }
 
         void waitFor() {
             if (!process.waitFor(120, SECONDS)) {
                 process.destroyForcibly()
                 process.waitFor(5, SECONDS)
-                forwarder.join()
                 throw new AssertionFailedError("Generated app did not exit within 120s")
             }
-            forwarder.join()
             if (process.exitValue() != 0) {
                 throw new AssertionFailedError("Generated app failed with exit code ${process.exitValue()}")
             }
@@ -107,11 +103,11 @@ abstract class AbstractIntegrationTest extends Specification {
         void kill() {
             process.destroy()
             if (!process.waitFor(5, SECONDS)) {
-                forwarder.join()
+                process.destroyForcibly()
                 if (!process.waitFor(5, SECONDS)) {
                     throw new AssertionFailedError("Generated app did not exit within 5s of being killed")
                 }
-                throw new AssertionFailedError("Generated app did not exit within 5s")
+                throw new AssertionFailedError("Generated app did not exit within 5s of destroy(), only after destroyForcibly()")
             }
         }
     }
@@ -179,36 +175,28 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         CommandHandle start(List<String> commandLine) {
+            File outFile = new File(rootDir, "build-builder-output.log")
             def builder = new ProcessBuilder(commandLine)
             builder.directory(rootDir)
             builder.environment().put("JAVA_HOME", System.getProperty("java.home"))
             builder.redirectErrorStream(true)
-            def process = builder.start()
-            def forwarder = new Thread() {
-                @Override
-                void run() {
-                    def buffer = new byte[1024]
-                    while (true) {
-                        int nread = process.inputStream.read(buffer)
-                        if (nread < 0) {
-                            break;
-                        }
-                        System.out.write(buffer, 0, nread)
-                    }
-                }
-            }
-            forwarder.start()
-            return new CommandHandle(process, forwarder)
+            builder.redirectOutput(outFile)
+            return new CommandHandle(builder.start())
         }
 
         void buildSucceeds(String... tasks) {
-            def gradleRunner = GradleRunner.create()
-            gradleRunner.withGradleVersion(gradleVersion)
-            gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
-            gradleRunner.withProjectDir(rootDir)
-            gradleRunner.withArguments(["-S"] + (tasks as List))
-            gradleRunner.forwardOutput()
-            gradleRunner.build()
+            File outFile = new File(rootDir, "build-builder-build.log")
+            outFile.parentFile?.mkdirs()
+            new FileWriter(outFile, true).withWriter { writer ->
+                def gradleRunner = GradleRunner.create()
+                gradleRunner.withGradleVersion(gradleVersion)
+                gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
+                gradleRunner.withProjectDir(rootDir)
+                gradleRunner.withArguments(["-S"] + (tasks as List))
+                gradleRunner.forwardStdOutput(writer)
+                gradleRunner.forwardStdError(writer)
+                gradleRunner.build()
+            }
         }
     }
 

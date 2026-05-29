@@ -36,7 +36,9 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        maxParallelForks = 2
+                        maxParallelForks = Runtime.getRuntime().availableProcessors()
+                        maxHeapSize = "1g"
+                        setForkEvery(50)
                     }
                 }
             }
