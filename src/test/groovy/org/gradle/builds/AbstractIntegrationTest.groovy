@@ -8,6 +8,7 @@ import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
@@ -75,7 +76,7 @@ abstract class AbstractIntegrationTest extends Specification {
                 String contents = parent.exists()
                     ? (parent.listFiles()?.collect { it.name + (it.directory ? "/" : "") }?.toString() ?: "<empty>")
                     : "<missing>"
-                throw new AssertionError("Expected binary at ${binFile}, but it does not exist. Parent dir listing: ${contents}")
+                throw new AssertionError("Expected binary at ${binFile}, but it does not exist. Parent dir listing: ${contents}") //FIXME: use an asserting from the test framework or whatever
             }
             return owner.start(this)
         }
@@ -102,10 +103,7 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         void waitFor() {
-            // Bound the wait. A generated app that hangs (e.g. a Swift
-            // launcher with a broken runtime) used to wedge the suite
-            // until the CI 6-hour job cap killed everything.
-            if (!process.waitFor(120, java.util.concurrent.TimeUnit.SECONDS)) {
+            if (!process.waitFor(120, TimeUnit.SECONDS)) {
                 process.destroyForcibly()
                 throw new AssertionFailedError("Generated app did not exit within 120s")
             }
@@ -184,10 +182,7 @@ abstract class AbstractIntegrationTest extends Specification {
 
         CommandHandle start(List<String> commandLine) {
             // Redirect to a file rather than buffering subprocess stdout in a
-            // forwarder thread. The Swift multi-project tests can produce
-            // hundreds of MB of compiler/linker output and the previous
-            // implementation held all of it in the test JVM, eventually
-            // pinning a fork at the heap ceiling.
+            // forwarder thread to avoid keeping all the output in memory.
             File outFile = new File(rootDir, "build-builder-output.log")
             def builder = new ProcessBuilder(commandLine)
             builder.directory(rootDir)
@@ -199,9 +194,8 @@ abstract class AbstractIntegrationTest extends Specification {
 
         void buildSucceeds(String... tasks) {
             // Stream the TestKit child's stdout/stderr to per-build files so
-            // long-running invocations (Swift multi-project compile,
-            // installDist on a 20-project Cpp build, etc.) do not balloon
-            // the test JVM heap via gradleRunner.forwardOutput().
+            // long-running invocations do not balloon the test JVM heap via
+            // gradleRunner.forwardOutput().
             File outFile = new File(rootDir, "build-builder-build.log")
             outFile.parentFile?.mkdirs()
             new FileWriter(outFile, true).withWriter { writer ->
@@ -260,7 +254,7 @@ abstract class AbstractIntegrationTest extends Specification {
             def text = buildFile.text
             // Match exact `apply plugin: '<id>'` strings — naive substring matches
             // collide with legitimate plugins on the root project (e.g. swiftpm-export
-            // matched 'swift', maven-publish does not but kotlin-* style ids would).
+            // matches 'swift', maven-publish does not but kotlin-* style ids would).
             def forbidden = [
                 'java', 'application', 'kotlin',
                 'cpp-application', 'cpp-library',

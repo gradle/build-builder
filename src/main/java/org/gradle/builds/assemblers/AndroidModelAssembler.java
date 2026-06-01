@@ -83,8 +83,6 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
         configBlock.property("versionName", "1.0.0");
         configBlock.property("testInstrumentationRunner", "androidx.test.runner.AndroidJUnitRunner");
         if (project.getPublicationTarget() != null) {
-            // AGP 8 requires explicit opt-in for the maven-publish `release`
-            // SoftwareComponent that the publishing block consumes.
             androidBlock.block("publishing").statement("singleVariant('release') { withSourcesJar() }");
         }
 

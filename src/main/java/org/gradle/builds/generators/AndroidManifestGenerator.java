@@ -15,8 +15,6 @@ public class AndroidManifestGenerator extends ProjectComponentSpecificSingleFile
     @Override
     protected void generate(ConfiguredProject project, AndroidComponent component, PrintWriter printWriter) {
         printWriter.println("<!-- GENERATED SOURCE FILE -->");
-        // AGP 8 requires the package to be declared via the `namespace` DSL on
-        // the android extension (set in AndroidModelAssembler), not the manifest.
         printWriter.println("<manifest xmlns:android='http://schemas.android.com/apk/res/android'>");
         printWriter.println("  <application");
         if (component.getLabelResource() != null) {
@@ -27,9 +25,6 @@ public class AndroidManifestGenerator extends ProjectComponentSpecificSingleFile
         }
         printWriter.println("  >");
         for (JavaClass javaClass : component.getActivities()) {
-            // Android 12+ requires android:exported on any activity that has an
-            // intent filter. We emit only activities with launcher intent filters
-            // for AndroidApplication, so always mark them exported.
             boolean hasIntentFilter = component instanceof AndroidApplication;
             printWriter.println("    <activity");
             printWriter.println("        android:name='" + javaClass.getName() + "'");

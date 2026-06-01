@@ -14,11 +14,9 @@ public class HasCppSource extends HasSource<CppSourceFile, CppLibraryApi> implem
     public int getMinHeapMegabytes() {
         // C++ compilation pulls in large header sets (Boost in particular) and
         // the resulting daemon classpath / metaspace plus parallel compileCpp
-        // workers comfortably exceed the 128 MB default. The value is consumed
-        // by GradlePropertiesGenerator to set org.gradle.jvmargs.
+        // workers comfortably exceed the 128 MB default.
         return 1024;
     }
-
 
     public List<CppHeaderFile> getPublicHeaderFiles() {
         return publicHeaders;

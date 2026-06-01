@@ -62,14 +62,12 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
 
     private void addJavaVersion(JavaLibrary library, BuildScript buildScript) {
         if (library.getTargetJavaVersion() != null) {
-            // Top-level `sourceCompatibility = ...` was removed in Gradle 9; it
-            // now lives on the `java {}` extension.
             buildScript.block("java").property("sourceCompatibility", library.getTargetJavaVersion());
         }
     }
 
     private void addDependencies(Project project, HasJavaSource<JavaLibraryApi> component, BuildScript buildScript) {
-        // Don't use Android libraries, only java libraries
+        // Don't use Android libraries, only Java libraries
         for (Dependency<Library<? extends JavaLibraryApi>> library : project.requiredLibraries(JavaLibraryApi.class)) {
             buildScript.dependsOn("implementation", library.getTarget().getDependency());
             component.uses(library.withTarget(library.getTarget().getApi()));
