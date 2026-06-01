@@ -18,7 +18,7 @@ class AndroidBuildIntegrationTest extends AbstractAndroidIntegrationTest {
         new File(srcDir, "AppImplApi.java").text.contains("org.gradle.example.app.AppImplCore.getSomeValue()")
         new File(srcDir, "AppImplApi.java").text.contains("org.gradle.example.app.AppImplCore.INT_CONST")
         new File(srcDir, "AppImplApi.java").text.contains("org.slf4j.LoggerFactory.getLogger(\"abc\")")
-        new File(srcDir, "AppImplApi.java").text.contains("android.support.v4.app.NavUtils.PARENT_ACTIVITY")
+        new File(srcDir, "AppImplApi.java").text.contains("androidx.core.app.NavUtils.PARENT_ACTIVITY")
         new File(srcDir, "AppImplApi.java").text.contains("org.gradle.example.app.R.string.testapp_string")
 
         // TODO check tests

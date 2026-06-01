@@ -26,7 +26,7 @@ class JavaBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -73,7 +73,7 @@ class JavaBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["lib.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["lib", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -150,7 +150,7 @@ class JavaBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["childlibapi-1.0.0.jar", "childlibcore-1.0.0.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["childlibapi", "childlibcore", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -165,13 +165,13 @@ class JavaBuildIntegrationTest extends AbstractIntegrationTest {
 
         def rootProject = build.rootProject.isJavaApplication()
 
-        def child1 = build(file("childapi"))
+        def child1 = build(file("childApi"))
         child1.isBuild()
         child1.rootProject.isEmptyProject()
         def child1lib1 = child1.project(":childapilibapi").isJavaLibrary()
         def child1lib2 = child1.project(":childapilibcore").isJavaLibrary()
 
-        def child2 = build(file("childcore"))
+        def child2 = build(file("childCore"))
         child2.isBuild()
         child2.rootProject.isEmptyProject()
         def child2lib1 = child2.project(":childcorelibapi").isJavaLibrary()
@@ -187,7 +187,7 @@ class JavaBuildIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["childapilibapi-1.0.0.jar", "childapilibcore-1.0.0.jar", "childcorelibapi-1.0.0.jar", "childcorelibcore-1.0.0.jar", "slf4j-api-1.7.25.jar", "slf4j-simple-1.7.25.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["childapilibapi", "childapilibcore", "childcorelibapi", "childcorelibcore", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")

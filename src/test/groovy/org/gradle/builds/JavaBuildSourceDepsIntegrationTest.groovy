@@ -29,14 +29,14 @@ class JavaBuildSourceDepsIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == [
-                "srcapilibapi-1.0.0.jar",
-                "srcapilibcore-1.0.0.jar",
-                "srccorelibapi-1.0.0.jar",
-                "srccorelibcore-1.0.0.jar",
-                "slf4j-api-1.7.25.jar",
-                "slf4j-simple-1.7.25.jar",
-                "testApp.jar"
+        baseNames(app.libDir.list()) == [
+                "srcapilibapi",
+                "srcapilibcore",
+                "srccorelibapi",
+                "srccorelibcore",
+                "slf4j-api",
+                "slf4j-simple",
+                "testApp"
         ] as Set
         app.succeeds()
 

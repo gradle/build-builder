@@ -10,8 +10,8 @@ public class BlockWithRepositories extends Scope {
         return repositories;
     }
 
-    public void jcenter() {
-        repositories.add(new ScriptBlock("jcenter"));
+    public void mavenCentral() {
+        repositories.add(new ScriptBlock("mavenCentral"));
     }
 
     public void google() {
@@ -24,7 +24,13 @@ public class BlockWithRepositories extends Scope {
 
     public void maven(HttpRepository repo) {
         ScriptBlock block = new ScriptBlock("maven");
-        block.property("url", repo.getUri().toString());
+        // The repo is served by an embedded HttpServer started as a Gradle
+        // BuildService from settings.gradle; the assigned port is exposed via
+        // gradle.ext.httpRepoPort. Parallel test forks each get their own.
+        block.property("url", new Scope.Code(
+                "\"http://localhost:${gradle.httpRepoPort}/\""));
+        // Gradle 7+ requires explicit opt-in for plain http:// repositories.
+        block.statement("allowInsecureProtocol = true");
         repositories.add(block);
     }
 }
