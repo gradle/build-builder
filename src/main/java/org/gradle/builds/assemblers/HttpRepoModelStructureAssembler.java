@@ -17,20 +17,16 @@ public class HttpRepoModelStructureAssembler implements BuildTreeAssembler {
 
     @Override
     public void populate(Settings settings, BuildTreeBuilder model) {
-        BuildStructureBuilder serverBuild = model.addBuild("repo-server");
-        serverBuild.setDisplayName("HTTP server build");
-        serverBuild.setRootProjectName("repo");
-
         Path repoDir = model.getRootDir().resolve("http-repo");
-        HttpRepository httpRepository = new HttpRepository(repoDir, 5005);
-        HttpServerImplementation httpServerImplementation = new HttpServerImplementation(httpRepository);
+        HttpRepository httpRepository = new HttpRepository(repoDir);
 
-        serverBuild.setSettings(new Settings(1, 1));
-        serverBuild.getProjectInitializer().rootProject(project -> {
+        // The main build hosts an embedded HttpServer (started by a Gradle
+        // BuildService in its settings script) and publishes the library
+        // builds into the local repo dir via GradleBuild tasks.
+        HttpServerImplementation httpServerImplementation = new HttpServerImplementation(httpRepository);
+        model.getMainBuild().getProjectInitializer().rootProject(project -> {
             project.addComponent(httpServerImplementation);
         });
-        serverBuild.publishAs(new PublicationTarget(httpRepository));
-        serverBuild.setTypeNamePrefix("Repo");
 
         for (int i = 1; i <= versionCount; i++) {
             Path externalSourceDir = model.getRootDir().resolve("external/v" + i);

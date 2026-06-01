@@ -21,6 +21,9 @@ public class SwiftSourceGenerator extends ProjectComponentSpecificGenerator<HasS
         for (SwiftSourceFile swiftSource : component.getTestFiles()) {
             generateTestSourceFile(testDir, swiftSource, fileGenerator);
         }
+        if (!component.getTestFiles().isEmpty()) {
+            generateXCTestMain(testDir, component, fileGenerator);
+        }
     }
 
     private void generateSourceFile(Path srcDir, SwiftSourceFile swiftSource, FileGenerator fileGenerator) throws IOException {
@@ -88,9 +91,44 @@ public class SwiftSourceGenerator extends ProjectComponentSpecificGenerator<HasS
                 }
                 printWriter.println("        XCTAssertEqual(1, 1)");
                 printWriter.println("    }");
+                // Explicit registration is required because the generated entry
+                // point uses XCTMain (see generateXCTestMain).
+                printWriter.println("    static var allTests = [");
+                printWriter.println("        (\"testOk\", testOk),");
+                printWriter.println("    ]");
                 printWriter.println("}");
                 printWriter.println();
             }
+        });
+    }
+
+    private void generateXCTestMain(Path testDir, HasSwiftSource component, FileGenerator fileGenerator) throws IOException {
+        Path mainFile = testDir.resolve("XCTestMain.swift");
+        fileGenerator.generate(mainFile, printWriter -> {
+            printWriter.println("// GENERATED SOURCE FILE");
+            printWriter.println("import XCTest");
+            printWriter.println();
+            // The Gradle xctest plugin links a standalone executable, not an
+            // .xctest bundle, so we have to supply an entry point ourselves.
+            // Without `@main` here the linker fails with "Undefined symbol _main"
+            // because relocateMainForTest strips main from the application's
+            // object files.
+            //
+            // XCTMain + testCase(...allTests) is portable: swift-corelibs-xctest
+            // exposes them on Linux, and Apple's XCTest provides the same overloads
+            // on Darwin specifically so cross-platform entry points can be shared.
+            printWriter.println("@main");
+            printWriter.println("struct TestRunner {");
+            printWriter.println("    static func main() {");
+            printWriter.println("        XCTMain([");
+            for (SwiftSourceFile testFile : component.getTestFiles()) {
+                for (SwiftClass testClass : testFile.getClasses()) {
+                    printWriter.println("            testCase(" + testClass.getName() + ".allTests),");
+                }
+            }
+            printWriter.println("        ])");
+            printWriter.println("    }");
+            printWriter.println("}");
         });
     }
 }

@@ -8,17 +8,26 @@ import org.gradle.testkit.runner.GradleRunner
 import spock.lang.Specification
 import spock.lang.TempDir
 
+import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 import java.util.regex.Pattern
 
 abstract class AbstractIntegrationTest extends Specification {
     private static final File SHARED_TESTKIT_DIR = new File("build/tmp/tests/testkit").canonicalFile.tap { mkdirs() }
 
+    // Strips the `.jar` suffix and any trailing `-<version>` so installed-lib
+    // assertions pin the *set of artifacts*, not their versions. Lets
+    // Dependabot bump catalog entries (slf4j, Kotlin stdlib, annotations, …)
+    // without the integration tests needing a matching update.
+    protected static Set<String> baseNames(String[] files) {
+        files.collect { it.replaceFirst(/\.jar$/, '').replaceFirst(/-\d[\w.]*$/, '') } as Set
+    }
+
     @TempDir
     File tmpDir
     File projectDir
     File userHomeDir
-    String gradleVersion = "5.0"
+    String gradleVersion = "8.14"
     BuildLayout build
 
     def setup() {
@@ -62,7 +71,13 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         CommandHandle start() {
-            assert binFile.isFile()
+            if (!binFile.isFile()) {
+                File parent = binFile.parentFile
+                String contents = parent.exists()
+                    ? (parent.listFiles()?.collect { it.name + (it.directory ? "/" : "") }?.toString() ?: "<empty>")
+                    : "<missing>"
+                throw new AssertionError("Expected binary at ${binFile}, but it does not exist. Parent dir listing: ${contents}") //FIXME: use an asserting from the test framework or whatever
+            }
             return owner.start(this)
         }
 
@@ -82,25 +97,24 @@ abstract class AbstractIntegrationTest extends Specification {
 
     static class CommandHandle {
         final Process process
-        final Thread forwarder
 
-        CommandHandle(Process process, Thread forwarder) {
+        CommandHandle(Process process) {
             this.process = process
-            this.forwarder = forwarder
         }
 
         void waitFor() {
-            process.waitFor()
-            forwarder.join()
+            if (!process.waitFor(120, TimeUnit.SECONDS)) {
+                process.destroyForcibly()
+                throw new AssertionFailedError("Generated app did not exit within 120s")
+            }
             if (process.exitValue() != 0) {
-                throw new AssertionFailedError("Build failed")
+                throw new AssertionFailedError("Generated app failed with exit code ${process.exitValue()}")
             }
         }
 
         void kill() {
             process.destroy()
             process.waitFor()
-            forwarder.join()
         }
     }
 
@@ -167,36 +181,33 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         CommandHandle start(List<String> commandLine) {
+            // Redirect to a file rather than buffering subprocess stdout in a
+            // forwarder thread to avoid keeping all the output in memory.
+            File outFile = new File(rootDir, "build-builder-output.log")
             def builder = new ProcessBuilder(commandLine)
             builder.directory(rootDir)
             builder.environment().put("JAVA_HOME", System.getProperty("java.home"))
             builder.redirectErrorStream(true)
-            def process = builder.start()
-            def forwarder = new Thread() {
-                @Override
-                void run() {
-                    def buffer = new byte[1024]
-                    while (true) {
-                        int nread = process.inputStream.read(buffer)
-                        if (nread < 0) {
-                            break;
-                        }
-                        System.out.write(buffer, 0, nread)
-                    }
-                }
-            }
-            forwarder.start()
-            return new CommandHandle(process, forwarder)
+            builder.redirectOutput(outFile)
+            return new CommandHandle(builder.start())
         }
 
         void buildSucceeds(String... tasks) {
-            def gradleRunner = GradleRunner.create()
-            gradleRunner.withGradleVersion(gradleVersion)
-            gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
-            gradleRunner.withProjectDir(rootDir)
-            gradleRunner.withArguments(["-S"] + (tasks as List))
-            gradleRunner.forwardOutput()
-            gradleRunner.build()
+            // Stream the TestKit child's stdout/stderr to per-build files so
+            // long-running invocations do not balloon the test JVM heap via
+            // gradleRunner.forwardOutput().
+            File outFile = new File(rootDir, "build-builder-build.log")
+            outFile.parentFile?.mkdirs()
+            new FileWriter(outFile, true).withWriter { writer ->
+                def gradleRunner = GradleRunner.create()
+                gradleRunner.withGradleVersion(gradleVersion)
+                gradleRunner.withTestKitDir(userHomeDir ?: SHARED_TESTKIT_DIR)
+                gradleRunner.withProjectDir(rootDir)
+                gradleRunner.withArguments(["-S"] + (tasks as List))
+                gradleRunner.forwardStdOutput(writer)
+                gradleRunner.forwardStdError(writer)
+                gradleRunner.build()
+            }
         }
     }
 
@@ -241,8 +252,18 @@ abstract class AbstractIntegrationTest extends Specification {
         void isEmptyProject() {
             isProject()
             def text = buildFile.text
-            // Could find a better way to verify this
-            assert !text.contains('java') && !text.contains('application') && !text.contains('swift') && !text.contains('android') && !text.contains('cpp')
+            // Match exact `apply plugin: '<id>'` strings — naive substring matches
+            // collide with legitimate plugins on the root project (e.g. swiftpm-export
+            // matches 'swift', maven-publish does not but kotlin-* style ids would).
+            def forbidden = [
+                'java', 'application', 'kotlin',
+                'cpp-application', 'cpp-library',
+                'swift-application', 'swift-library',
+                'com.android.application', 'com.android.library'
+            ]
+            forbidden.each { p ->
+                assert !text.contains("apply plugin: '${p}'") : "Project unexpectedly applies plugin '${p}'"
+            }
         }
 
         void containsFilesWithExtension(File dir, String extension) {

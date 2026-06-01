@@ -1,13 +1,14 @@
 package org.gradle.builds.assemblers
 
+import org.gradle.builds.generators.GeneratorVersions
 import org.gradle.builds.model.*
 
 class KotlinModelAssembler : LanguageSpecificProjectConfigurer<KotlinApplication, KotlinLibrary>(KotlinApplication::class.java, KotlinLibrary::class.java) {
     override fun rootProject(settings: Settings, project: Project) {
         val buildScript = project.buildScript
-        buildScript.buildScriptBlock().jcenter()
-        buildScript.requireOnBuildScriptClasspath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.41")
-        buildScript.allProjects().jcenter()
+        buildScript.buildScriptBlock().mavenCentral()
+        buildScript.requireOnBuildScriptClasspath(GeneratorVersions.KOTLIN_GRADLE_PLUGIN)
+        buildScript.allProjects().mavenCentral()
     }
 
     override fun application(settings: Settings, project: Project, application: KotlinApplication) {
@@ -20,7 +21,7 @@ class KotlinModelAssembler : LanguageSpecificProjectConfigurer<KotlinApplication
 
         val mainClass = application.addClass("${project.qualifiedNamespaceFor}.${project.typeNameFor}")
         mainClass.addRole(AppEntryPoint())
-        buildScript.property("mainClassName", "${mainClass.name}Kt")
+        buildScript.block("application").property("mainClass", "${mainClass.name}Kt")
         addDependencies(application, mainClass)
 
         JvmModelAssembler.addSource(project, application, mainClass) {}

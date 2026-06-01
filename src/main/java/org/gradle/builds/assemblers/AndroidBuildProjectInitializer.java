@@ -26,7 +26,10 @@ public class AndroidBuildProjectInitializer extends ProjectInitializer {
     public void initAlternateLibraryProject(Project project) {
         if (includeJavaLibraries) {
             JavaLibrary javaLibrary = new JavaLibrary(project);
-            javaLibrary.setTargetJavaVersion("1.7");
+            // Source/target option 7 was removed by javac. Modern AGP requires
+            // Java 11+ for its own classpath anyway, so emit 11 for the
+            // Java libraries bundled into the Android build.
+            javaLibrary.setTargetJavaVersion("11");
             project.addComponent(javaLibrary);
         } else {
             initLibraryProject(project);
