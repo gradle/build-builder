@@ -1,13 +1,6 @@
 package org.gradle.builds
 
 class KotlinBuildIntegrationTest extends AbstractIntegrationTest {
-    // Strips a trailing `-<version>.jar` suffix so assertions pin the set of
-    // artifacts present, not their versions (Kotlin and the jetbrains
-    // annotations jar bump independently of this repo).
-    private static Set<String> baseNames(String[] files) {
-        files.collect { it.replaceFirst(/\.jar$/, '').replaceFirst(/-\d[\w.]*$/, '') } as Set
-    }
-
     def "can generate Kotlin application"() {
         when:
         new Main().run("kotlin", "--dir", projectDir.absolutePath)

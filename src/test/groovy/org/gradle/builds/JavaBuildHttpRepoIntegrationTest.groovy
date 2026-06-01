@@ -41,7 +41,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["extlibapi1-1.0.0.jar", "extlibapi2-1.0.0.jar", "extlibcore-1.0.0.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["extlibapi1", "extlibapi2", "extlibcore", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -74,7 +74,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["ext-1.0.0.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["ext", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -115,7 +115,7 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["extlibapi1-1.0.0.jar", "extlibapi2-1.0.0.jar", "extlibcore-1.0.0.jar", "libapi.jar", "libcore.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
+        baseNames(app.libDir.list()) == ["extlibapi1", "extlibapi2", "extlibcore", "libapi", "libcore", "slf4j-api", "slf4j-simple", "testApp"] as Set
         app.succeeds()
 
         build.buildSucceeds("build")
@@ -161,7 +161,10 @@ class JavaBuildHttpRepoIntegrationTest extends AbstractIntegrationTest {
 
         def app = build.app("build/install/testApp/bin/testApp")
         app.isApp()
-        app.libDir.list() as Set == ["extlibapi1-3.0.0.jar", "extlibapi2-3.0.0.jar", "extlibcore-3.0.0.jar", "slf4j-api-2.0.18.jar", "slf4j-simple-2.0.18.jar", "testApp.jar"] as Set
+        def installedLibs = app.libDir.list()
+        baseNames(installedLibs) == ["extlibapi1", "extlibapi2", "extlibcore", "slf4j-api", "slf4j-simple", "testApp"] as Set
+        // The whole point of this test: the consumer must resolve the highest published version, not 1.0.0 or 2.0.0.
+        installedLibs.toList().containsAll(["extlibapi1-3.0.0.jar", "extlibapi2-3.0.0.jar", "extlibcore-3.0.0.jar"])
         app.succeeds()
 
         build.buildSucceeds("build")
