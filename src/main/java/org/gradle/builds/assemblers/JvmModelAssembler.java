@@ -6,6 +6,15 @@ import java.util.Collections;
 import java.util.function.Consumer;
 
 public abstract class JvmModelAssembler<A extends Component, L extends Component> extends LanguageSpecificProjectConfigurer<A, L> {
+    /**
+     * JUnit 4 coordinate emitted into every generated JVM test target. Shared
+     * across {@link JavaModelAssembler}, {@link AndroidModelAssembler} and the
+     * Kotlin {@code GradlePluginModelAssembler} so bumping JUnit is a single
+     * edit. Generators stay on JUnit 4 per project policy — only the version
+     * tracks current.
+     */
+    public static final String JUNIT_DEPENDENCY = "junit:junit:4.13.2";
+
     private static final JavaLibraryApi slf4jApi = new JavaLibraryApi("slf4j", Collections.singletonList(JavaClassApi.method("org.slf4j.LoggerFactory", "getLogger(\"abc\")")));
     static final PublishedLibrary<JavaLibraryApi> slfj4 = new PublishedLibrary<>("slf4j", new ExternalDependencyDeclaration("org.slf4j:slf4j-api:1.7.25"), slf4jApi);
     static final PublishedLibrary<JavaLibraryApi> slfj4Simple = new PublishedLibrary<>("slf4j-simple", new ExternalDependencyDeclaration("org.slf4j:slf4j-simple:1.7.25"), new JavaLibraryApi("slaf4-simple", Collections.emptyList()));

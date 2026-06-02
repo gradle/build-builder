@@ -10,7 +10,7 @@ class GradlePluginModelAssembler : ComponentSpecificProjectConfigurer<GradlePlug
         val buildScript = project.buildScript
         buildScript.requirePlugin("java-gradle-plugin")
         buildScript.mavenCentral()
-        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.13.2")
+        buildScript.dependsOnExternal("testImplementation", JvmModelAssembler.JUNIT_DEPENDENCY)
 
         val id = component.id!!
         val pos = id.lastIndexOf(".")

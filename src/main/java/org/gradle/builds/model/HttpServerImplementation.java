@@ -4,7 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HttpServerImplementation implements Component {
+public class HttpServerImplementation implements Component, HasHeapRequirements {
     private final Path rootDir;
     private final int port;
     private final List<Path> sourceBuilds = new ArrayList<>();
@@ -28,5 +28,14 @@ public class HttpServerImplementation implements Component {
 
     public int getPort() {
         return port;
+    }
+
+    @Override
+    public int getMinHeapMegabytes() {
+        // The HTTP-repo server build invokes nested GradleBuild tasks that
+        // publish the library builds (which may be Android). With the outer
+        // and inner Gradle daemons both in memory we need a generous cap or
+        // the daemon GC-thrashes itself to death.
+        return 2048;
     }
 }

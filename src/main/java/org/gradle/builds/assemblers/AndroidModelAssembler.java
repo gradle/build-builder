@@ -5,8 +5,24 @@ import org.gradle.builds.model.*;
 import java.util.Collections;
 
 public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication, AndroidLibrary> {
-    public static final String defaultVersion = "3.4.1";
-    private static final PublishedLibrary<JavaLibraryApi> supportUtils = new PublishedLibrary<>("support-core-utils", new ExternalDependencyDeclaration("com.android.support:support-core-utils:25.1.0"), new JavaLibraryApi("support-core-utils", Collections.singletonList(JavaClassApi.field("android.support.v4.app.NavUtils", "PARENT_ACTIVITY"))));
+    /**
+     * Default Android Gradle Plugin coordinate emitted into the generated
+     * build.gradle. Surfaced as the default value of build-builder's
+     * {@code android --version} CLI option in {@link org.gradle.builds.Main}.
+     * Update together with {@link #ANDROIDX_LEGACY_SUPPORT_CORE_UTILS} /
+     * {@link #ANDROIDX_TEST_RUNNER} when bumping AGP.
+     */
+    public static final String defaultVersion = "8.10.0";
+    private static final String ANDROIDX_LEGACY_SUPPORT_CORE_UTILS = "androidx.legacy:legacy-support-core-utils:1.0.0";
+    private static final String ANDROIDX_ANNOTATION = "androidx.annotation:annotation:1.7.0";
+    private static final String ANDROIDX_TEST_RUNNER = "androidx.test:runner:1.6.2";
+    private static final int COMPILE_SDK = 34;
+    private static final int MIN_SDK = 21;
+    private static final int TARGET_SDK = 34;
+    private static final PublishedLibrary<JavaLibraryApi> supportUtils = new PublishedLibrary<>(
+            "support-core-utils",
+            new ExternalDependencyDeclaration(ANDROIDX_LEGACY_SUPPORT_CORE_UTILS),
+            new JavaLibraryApi("support-core-utils", Collections.singletonList(JavaClassApi.field("androidx.core.app.NavUtils", "PARENT_ACTIVITY"))));
     private final String pluginVersion;
 
     public AndroidModelAssembler(String pluginVersion) {
@@ -18,9 +34,6 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
     protected void rootProject(Settings settings, Project rootProject) {
         super.rootProject(settings, rootProject);
         BuildScript buildScript = rootProject.getBuildScript();
-        if (pluginVersion.startsWith("2.5.")) {
-            buildScript.buildScriptBlock().mavenLocal();
-        }
         buildScript.buildScriptBlock().google();
         buildScript.buildScriptBlock().mavenCentral();
         buildScript.requireOnBuildScriptClasspath("com.android.tools.build:gradle:" + pluginVersion);
@@ -44,14 +57,15 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
         addApplicationResources(androidApplication);
 
         ScriptBlock androidBlock = buildScript.block("android");
-        androidBlock.property("compileSdkVersion", 26);
+        androidBlock.property("namespace", androidApplication.getPackageName());
+        androidBlock.property("compileSdk", COMPILE_SDK);
         ScriptBlock configBlock = androidBlock.block("defaultConfig");
         configBlock.property("applicationId", androidApplication.getPackageName());
-        configBlock.property("minSdkVersion", 21);
-        configBlock.property("targetSdkVersion", 26);
+        configBlock.property("minSdk", MIN_SDK);
+        configBlock.property("targetSdk", TARGET_SDK);
         configBlock.property("versionCode", 1);
         configBlock.property("versionName", "1.0.0");
-        configBlock.property("testInstrumentationRunner", "android.support.test.runner.AndroidJUnitRunner");
+        configBlock.property("testInstrumentationRunner", "androidx.test.runner.AndroidJUnitRunner");
 
         addSourceFiles(project, androidApplication, appActivity, rClass);
         addTests(project, androidApplication);
@@ -70,13 +84,17 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
         addDependencies(project, androidLibrary, buildScript);
 
         ScriptBlock androidBlock = buildScript.block("android");
-        androidBlock.property("compileSdkVersion", 26);
+        androidBlock.property("namespace", androidLibrary.getPackageName());
+        androidBlock.property("compileSdk", COMPILE_SDK);
         ScriptBlock configBlock = androidBlock.block("defaultConfig");
-        configBlock.property("minSdkVersion", 21);
-        configBlock.property("targetSdkVersion", 26);
+        configBlock.property("minSdk", MIN_SDK);
+        configBlock.property("targetSdk", TARGET_SDK);
         configBlock.property("versionCode", 1);
         configBlock.property("versionName", "1.0.0");
-        configBlock.property("testInstrumentationRunner", "android.support.test.runner.AndroidJUnitRunner");
+        configBlock.property("testInstrumentationRunner", "androidx.test.runner.AndroidJUnitRunner");
+        if (project.getPublicationTarget() != null) {
+            androidBlock.block("publishing").statement("singleVariant('release') { withSourcesJar() }");
+        }
 
         addSourceFiles(project, androidLibrary, libraryActivity, rClass);
         addTests(project, androidLibrary);
@@ -96,7 +114,11 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             buildScript.property("version", version);
             if (project.getPublicationTarget().getHttpRepository() != null) {
                 buildScript.requirePlugin("maven-publish");
-                ScriptBlock publishing = buildScript.block("publishing");
+                // The `release` SoftwareComponent only exists after AGP has
+                // processed the android { publishing { singleVariant(...) } }
+                // block, so the publication wiring must run in afterEvaluate.
+                ScriptBlock afterEvaluate = buildScript.block("afterEvaluate");
+                ScriptBlock publishing = afterEvaluate.block("publishing");
                 publishing.block("publications").statement("mavenJava(MavenPublication) { from components.release }");
                 ScriptBlock mavenRepo = publishing.block("repositories").block("maven");
                 mavenRepo.property("url", project.getPublicationTarget().getHttpRepository().getRootDir().toUri().toString());
@@ -114,9 +136,11 @@ public class AndroidModelAssembler extends JvmModelAssembler<AndroidApplication,
             }
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
-        buildScript.dependsOnExternal("testImplementation", "junit:junit:4.12");
-        buildScript.dependsOnExternal("androidTestImplementation", "com.android.support:support-annotations:25.1.0");
-        buildScript.dependsOnExternal("androidTestImplementation", "com.android.support.test:runner:0.5");
+        buildScript.dependsOnExternal("testImplementation", JUNIT_DEPENDENCY);
+        // androidx.test:runner pins its own annotation version transitively; do not
+        // pin annotation here or we hit strict-constraint conflicts.
+        buildScript.dependsOnExternal("androidTestImplementation", ANDROIDX_TEST_RUNNER);
+        buildScript.dependsOnExternal("androidTestImplementation", GeneratorVersions.ANDROIDX_TEST_EXT_JUNIT);
     }
 
     @Override

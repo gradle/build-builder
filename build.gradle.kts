@@ -18,10 +18,6 @@ dependencies {
     runtimeOnly(libs.slf4j.simple)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
-}
-
 application {
     mainClass.set("org.gradle.builds.Main")
 }
