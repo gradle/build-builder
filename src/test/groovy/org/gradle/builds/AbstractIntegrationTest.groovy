@@ -16,6 +16,14 @@ import static java.util.concurrent.TimeUnit.*
 abstract class AbstractIntegrationTest extends Specification {
     private static final File SHARED_TESTKIT_DIR = new File("build/tmp/tests/testkit").canonicalFile.tap { mkdirs() }
 
+    // Strips the `.jar` suffix and any trailing `-<version>` so installed-lib
+    // assertions pin the *set of artifacts*, not their versions. Lets
+    // Dependabot bump catalog entries (slf4j, Kotlin stdlib, annotations, …)
+    // without the integration tests needing a matching update.
+    protected static Set<String> baseNames(String[] files) {
+        files.collect { it.replaceFirst(/\.jar$/, '').replaceFirst(/-\d[\w.]*$/, '') } as Set
+    }
+
     @TempDir
     File tmpDir
     File projectDir
