@@ -136,8 +136,10 @@ public class CppModelAssembler extends LanguageSpecificProjectConfigurer<CppAppl
             buildScript.property("version", version);
             if (project.getPublicationTarget().getHttpRepository() != null) {
                 buildScript.requirePlugin("maven-publish");
-                buildScript.block("publishing").block("repositories").block("maven").property("url",
+                ScriptBlock mavenRepo = buildScript.block("publishing").block("repositories").block("maven");
+                mavenRepo.property("url",
                         new Scope.Code("uri('" + project.getPublicationTarget().getHttpRepository().getRootDir().toUri() + "')"));
+                mavenRepo.statement("allowInsecureProtocol = true");
             }
         }
     }
