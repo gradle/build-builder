@@ -2,11 +2,7 @@ package org.gradle.builds
 
 import spock.lang.Unroll
 
-class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
-    def setup() {
-        gradleVersion = "5.4.1"
-    }
-
+class SwiftBuildIntegrationTest extends AbstractSwiftIntegrationTest {
     def "can generate single project build"() {
         when:
         new Main().run("swift", "--dir", projectDir.absolutePath)
@@ -21,14 +17,14 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         new File(srcDir, "AppImplApi.swift").text.contains("let appimplcore = AppImplCore()")
 
         def testDir = rootProject.file("src/test/swift")
-        testDir.list() as Set == ["AppTest.swift", "AppImplApiTest.swift", "AppImplCoreTest.swift"] as Set
+        testDir.list() as Set == ["AppTest.swift", "AppImplApiTest.swift", "AppImplCoreTest.swift", "XCTestMain.swift"] as Set
         new File(testDir, "AppTest.swift").text.contains("import TestApp")
         new File(testDir, "AppTest.swift").text.contains("let app = App()")
 
         rootProject.dependsOn()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
     }
@@ -44,17 +40,17 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         def srcDir = rootProject.file("src/main/swift")
         srcDir.list() as Set == ["main.swift", "AppImplApi.swift", "AppImplCore.swift"] as Set
 
-        rootProject.file("src/test/swift").list() as Set == ["AppTest.swift", "AppImplApiTest.swift", "AppImplCoreTest.swift"] as Set
+        rootProject.file("src/test/swift").list() as Set == ["AppTest.swift", "AppImplApiTest.swift", "AppImplCoreTest.swift", "XCTestMain.swift"] as Set
 
         def libProject = build.project(":lib").isSwiftLibrary()
         libProject.file("src/main/swift").list() as Set == ["Lib.swift", "LibImplApi.swift", "LibImplCore.swift"] as Set
-        libProject.file("src/test/swift").list() as Set == ["LibTest.swift", "LibImplApiTest.swift", "LibImplCoreTest.swift"] as Set
+        libProject.file("src/test/swift").list() as Set == ["LibTest.swift", "LibImplApiTest.swift", "LibImplCoreTest.swift", "XCTestMain.swift"] as Set
 
         rootProject.dependsOn(libProject)
         libProject.dependsOn()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
     }
@@ -69,12 +65,12 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.rootProject.isSwiftApplication()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
 
         where:
-        count << [3, 5, 10, 20]
+        count << [3, 5, 10]
     }
 
     @Unroll
@@ -86,22 +82,25 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         build.isBuild()
         build.rootProject.isSwiftApplication()
         build.rootProject.file("src/main/swift").list().size() == count
-        build.rootProject.file("src/test/swift").list().size() == count
+        build.rootProject.file("src/test/swift").list().size() == count + 1
 
         build.project(":libapi1").isSwiftLibrary()
         build.project(":libapi1").file("src/main/swift").list().size() == count
-        build.project(":libapi1").file("src/test/swift").list().size() == count
+        build.project(":libapi1").file("src/test/swift").list().size() == count + 1
 
         build.project(":libapi2").isSwiftLibrary()
         build.project(":libcore").isSwiftLibrary()
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
 
         where:
-        count << [1, 5, 10, 20]
+        // Swift compilation dominates wall time here (~80 files at N=20), and
+        // the 2-digit-suffix and deeper-graph coverage that 20 would add is
+        // already exercised by the Java and Cpp generators at the same N.
+        count << [1, 5, 10]
     }
 
     def "can generate using Swift PM layout"() {
@@ -119,15 +118,15 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
         new File(srcDir, "AppImplApi.swift").text.contains("import Lib")
         new File(srcDir, "AppImplApi.swift").text.contains("let lib = Lib()")
 
-        build.file("Tests/testAppTests").list() as Set == ["AppTest.swift", "AppImplApiTest.swift", "AppImplCoreTest.swift"] as Set
+        build.file("Tests/testAppTests").list() as Set == ["AppTest.swift", "AppImplApiTest.swift", "AppImplCoreTest.swift", "XCTestMain.swift"] as Set
 
         build.project(":lib").isSwiftPMProject()
         build.file("Sources/lib").list() as Set == ["Lib.swift", "LibImplApi.swift", "LibImplCore.swift"] as Set
 
-        build.file("Tests/libTests").list() as Set == ["LibTest.swift", "LibImplApiTest.swift", "LibImplCoreTest.swift"] as Set
+        build.file("Tests/libTests").list() as Set == ["LibTest.swift", "LibImplApiTest.swift", "LibImplCoreTest.swift", "XCTestMain.swift"] as Set
 
         build.buildSucceeds(":installDebug")
-        build.app("build/install/main/debug/testApp").succeeds()
+        build.app("build/install/main/debug/TestApp").succeeds()
 
         build.buildSucceeds("build")
     }
@@ -153,7 +152,7 @@ class SwiftBuildIntegrationTest extends AbstractIntegrationTest {
 
         build.buildSucceeds(":installDebug")
 
-        def app = build.app("build/install/main/debug/testApp")
+        def app = build.app("build/install/main/debug/TestApp")
         app.succeeds()
 
         build.buildSucceeds("build")

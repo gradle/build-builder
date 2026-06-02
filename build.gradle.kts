@@ -16,20 +16,32 @@ dependencies {
     implementation(libs.kotlin.stdlib)
 
     runtimeOnly(libs.slf4j.simple)
-
-    testImplementation(gradleTestKit())
-    testImplementation(libs.spock.core)
-    testImplementation(libs.junit)
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 application {
     mainClass.set("org.gradle.builds.Main")
 }
 
-tasks.named<Test>("test") {
-    maxParallelForks = 2
+testing {
+    suites {
+        val test by getting(JvmTestSuite::class) {
+            useSpock(libs.versions.spock)
+            dependencies {
+                implementation(gradleTestKit())
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        maxParallelForks = Runtime.getRuntime().availableProcessors()
+                        maxHeapSize = "1g"
+                        setForkEvery(50)
+                    }
+                }
+            }
+        }
+    }
 }

@@ -1,6 +1,6 @@
 package org.gradle.builds
 
-class SwiftBuildSourceDepsIntegrationTest extends AbstractIntegrationTest {
+class SwiftBuildSourceDepsIntegrationTest extends AbstractSwiftIntegrationTest {
     def "can generate build with source dependencies"() {
         when:
         new Main().run("swift", "--dir", projectDir.absolutePath, "--source-dep-builds", "2")
@@ -30,7 +30,7 @@ class SwiftBuildSourceDepsIntegrationTest extends AbstractIntegrationTest {
 
         build.buildSucceeds(":installDebug")
 
-        def app = build.app("build/install/main/debug/testApp")
+        def app = build.app("build/install/main/debug/TestApp")
         app.succeeds()
 
         build.buildSucceeds("build")

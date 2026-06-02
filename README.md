@@ -1,4 +1,4 @@
-## build builder
+# build builder
 
 Generates various builds that can be used for testing, profiling and benchmarking Gradle.
 
@@ -9,7 +9,7 @@ Supported build types:
 - C++ application (Gradle 4.2 and later)
 - Swift application (Gradle 4.5 and later)
 
-Generates one or more projects with source files. Can also be used to add source files to an existing skeleton build. 
+Generates one or more projects with source files. Can also be used to add source files to an existing skeleton build.
 The source files have dependencies between each other, as described below.
 
 Generates JUnit unit tests for Java and Android projects, plus on-device tests for Android projects.
@@ -27,17 +27,17 @@ Can optionally generate a Swift Package Manager build for Swift projects.
 
 Generates a git repository for each build.
 
-Generates a [gradle-profiler](https://www.github.com/gradle/gradle-profiler) scenario file for the build.
+Generates a [gradle-profiler](https://github.com/gradle/gradle-profiler) scenario file for the build.
 
 Generates an HTML file that shows the dependencies between builds and projects.
 
-### Command line usage
+## Command line usage
 
-#### Installation
+### Installation
 
 Run `./gradlew installDist` to build and install into `build/install/build-builder`.
 
-#### Create a build
+### Create a build
 
 `build-builder java|cpp|swift|android [options]`
 
@@ -59,37 +59,37 @@ The `--source-dep-builds` option specifies the number of additional builds to in
 
 The `--buildsrc` option enables generation of a `buildSrc` build. Default is false.
 
-#### Android specific options
+### Android specific options
 
 The `--java` option includes some Java libraries in an Android build. Default is false. 
 
 The `--version` option specifies the Android plugin version to use. Default is `3.0.0`.
 
-#### C++ specific options
+### C++ specific options
 
 The `--header-files` option specifies the number of header files per project. Default is 3.
 
 The `--boost` option specifies that the source files include references to the boost libraries. Default is false.
 
-#### Swift specific options
+### Swift specific options
 
 The `--swift-pm` option uses Swift package manager source conventions, and also generates a Swift PM build file.
 
-### Build structure and dependency graph
+## Build structure and dependency graph
 
-The root project will define an application of the relevant type, and all other projects will define a library of the relevant type. 
+The root project will define an application of the relevant type, and all other projects will define a library of the relevant type.
 
-#### Project dependency graph
+### Project dependency graph
 
 - The application depends either directly or indirectly on all library projects
 - Libraries are arranged in layers of 3 - 6 projects.
 - The bottom-most libraries, with no dependencies, are suffixed with `core`.
 
-Here's an example: 
+Here's an example:
 
-<img src="https://rawgit.com/adammurdoch/build-builder/master/src/doc/projects.svg">
-           
-#### Dependencies between source files
+![Project dependency graph](src/doc/projects.svg)
+
+### Dependencies between source files
 
 - Each application has a main class. The remaining classes in the project, if any, are implementation classes.
 - Each library has an API class, used by other projects. The remaining classes in the project, if any, are implementation classes and are not used directly by any other project. They are used indirectly.
@@ -101,24 +101,24 @@ Here's an example:
 
 Here's an example:
 
-<img src="https://rawgit.com/adammurdoch/build-builder/master/src/doc/sources.svg">
+![Source file dependency graph](src/doc/sources.svg)
 
-### Current limitations
+## Current limitations
 
-#### Generating builds
+### Generating builds
 
-- Android application 
-    - Should use plugin version 3.0 
+- Android application
+    - Should use plugin version 3.0
     - Only a single Java project per layer.
     - Only a single instrumented test per project, doesn't do anything.
     - No multi-dex, multi-apk splits, instant app, etc
-- C++ application    
+- C++ application
     - There are no external dependencies
     - Add Google tests
     - Very simple header dependency graph
-    - API dependencies of classes do not appear on the API 
+    - API dependencies of classes do not appear on the API
     - Incremental performance scenarios should mutate deepest header and source files for the target project
-- Swift application    
+- Swift application
     - There are no external dependencies
     - No incremental performance scenarios
     - No implementation dependencies
@@ -148,7 +148,7 @@ Here's an example:
     - More incoming and api dependencies
 - Does not clean up previously generated files when build is re-generated.
 - Generated classes are small.
-- There are no transitive API classes. 
+- There are no transitive API classes.
 - There are no type hierarchies.
 - Implementation classes are public.
 - Improve project and source file names, particularly test files.

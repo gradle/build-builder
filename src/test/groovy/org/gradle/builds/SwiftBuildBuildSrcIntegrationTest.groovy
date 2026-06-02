@@ -1,6 +1,6 @@
 package org.gradle.builds
 
-class SwiftBuildBuildSrcIntegrationTest extends AbstractIntegrationTest {
+class SwiftBuildBuildSrcIntegrationTest extends AbstractSwiftIntegrationTest {
     def "can generate buildsrc"() {
         when:
         new Main().run("swift", "--dir", projectDir.absolutePath, "--buildsrc")
