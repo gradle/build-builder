@@ -11,6 +11,13 @@ class GradlePluginModelAssembler : ComponentSpecificProjectConfigurer<GradlePlug
         val buildScript = project.buildScript
         buildScript.requirePlugin("java-gradle-plugin")
         buildScript.mavenCentral()
+        // Cap target compatibility so the jar stays readable by Gradle's
+        // bundled ASM. Gradle 9.0 ships ASM that does not understand class file
+        // major version 69 (Java 25), so a buildSrc compiled with the daemon
+        // JVM (Java 25 here) fails the instrumentation transform.
+        val javaBlock = buildScript.block("java")
+        javaBlock.statement("sourceCompatibility = JavaVersion.VERSION_17")
+        javaBlock.statement("targetCompatibility = JavaVersion.VERSION_17")
         buildScript.dependsOnExternal("testImplementation", GeneratorVersions.JUNIT4)
 
         val id = component.id!!

@@ -28,7 +28,7 @@ abstract class AbstractIntegrationTest extends Specification {
     File tmpDir
     File projectDir
     File userHomeDir
-    String gradleVersion = "8.14.5"
+    String gradleVersion = "9.0.0"
     BuildLayout build
 
     def setup() {
