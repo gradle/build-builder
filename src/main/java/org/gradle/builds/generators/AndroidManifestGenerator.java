@@ -15,8 +15,7 @@ public class AndroidManifestGenerator extends ProjectComponentSpecificSingleFile
     @Override
     protected void generate(ConfiguredProject project, AndroidComponent component, PrintWriter printWriter) {
         printWriter.println("<!-- GENERATED SOURCE FILE -->");
-        printWriter.println("<manifest xmlns:android='http://schemas.android.com/apk/res/android'");
-        printWriter.println("        package='" + component.getPackageName() + "'>");
+        printWriter.println("<manifest xmlns:android='http://schemas.android.com/apk/res/android'>");
         printWriter.println("  <application");
         if (component.getLabelResource() != null) {
             printWriter.println("    android:label='@string/" + component.getLabelResource() + "'");
@@ -26,8 +25,11 @@ public class AndroidManifestGenerator extends ProjectComponentSpecificSingleFile
         }
         printWriter.println("  >");
         for (JavaClass javaClass : component.getActivities()) {
-            printWriter.println("    <activity android:name='" + javaClass.getName() + "'>");
-            if (component instanceof AndroidApplication) {
+            boolean hasIntentFilter = component instanceof AndroidApplication;
+            printWriter.println("    <activity");
+            printWriter.println("        android:name='" + javaClass.getName() + "'");
+            printWriter.println("        android:exported='" + hasIntentFilter + "'>");
+            if (hasIntentFilter) {
                 printWriter.println("      <intent-filter>");
                 printWriter.println("        <action android:name='android.intent.action.MAIN'/>");
                 printWriter.println("        <category android:name='android.intent.category.LAUNCHER'/>");

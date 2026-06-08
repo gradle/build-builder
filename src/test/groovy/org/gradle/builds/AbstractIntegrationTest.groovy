@@ -16,11 +16,19 @@ import static java.util.concurrent.TimeUnit.*
 abstract class AbstractIntegrationTest extends Specification {
     private static final File SHARED_TESTKIT_DIR = new File("build/tmp/tests/testkit").canonicalFile.tap { mkdirs() }
 
+    // Strips the `.jar` suffix and any trailing `-<version>` so installed-lib
+    // assertions pin the *set of artifacts*, not their versions. Lets
+    // Dependabot bump catalog entries (slf4j, Kotlin stdlib, annotations, …)
+    // without the integration tests needing a matching update.
+    protected static Set<String> baseNames(String[] files) {
+        files.collect { it.replaceFirst(/\.jar$/, '').replaceFirst(/-\d[\w.]*$/, '') } as Set
+    }
+
     @TempDir
     File tmpDir
     File projectDir
     File userHomeDir
-    String gradleVersion = "5.0"
+    String gradleVersion = "8.14.5"
     BuildLayout build
 
     def setup() {
@@ -64,7 +72,11 @@ abstract class AbstractIntegrationTest extends Specification {
         }
 
         CommandHandle start() {
-            assert binFile.isFile()
+            File parent = binFile.parentFile
+            String contents = parent.exists()
+                ? (parent.listFiles()?.collect { it.name + (it.directory ? "/" : "") }?.toString() ?: "<empty>")
+                : "<missing>"
+            assert binFile.isFile() : "Expected binary at ${binFile}, but it does not exist. Parent dir listing: ${contents}"
             return owner.start(this)
         }
 

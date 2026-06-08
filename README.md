@@ -6,8 +6,8 @@ Supported build types:
 
 - Java application
 - Android application
-- C++ application (Gradle 4.2 and later)
-- Swift application (Gradle 4.5 and later)
+- C++ application
+- Swift application
 
 Generates one or more projects with source files. Can also be used to add source files to an existing skeleton build.
 The source files have dependencies between each other, as described below.
@@ -63,7 +63,7 @@ The `--buildsrc` option enables generation of a `buildSrc` build. Default is fal
 
 The `--java` option includes some Java libraries in an Android build. Default is false. 
 
-The `--version` option specifies the Android plugin version to use. Default is `3.0.0`.
+The `--version` option specifies the Android plugin version to use. Default is whatever `agp` is pinned at in `gradle/libs.versions.toml` (currently AGP 8.x).
 
 ### C++ specific options
 
@@ -108,7 +108,6 @@ Here's an example:
 ### Generating builds
 
 - Android application
-    - Should use plugin version 3.0
     - Only a single Java project per layer.
     - Only a single instrumented test per project, doesn't do anything.
     - No multi-dex, multi-apk splits, instant app, etc
@@ -133,14 +132,13 @@ Here's an example:
     - Not available for Swift
     - Dependencies used by 'impl' class only, and this project uses all libraries from the repo directly rather than some set of API libraries
     - Coordinates collide with previous generated libraries, should generate unique-ish coordinates each time
-    - Publishing to the repo is broken
 - Composite builds
     - Doesn't generate a library project with `--projects 1` (the default)
     - Dependencies used by 'impl' class only, and this project uses all libraries from the repo directly rather than some set of API libraries
 - External dependencies are the same for all projects.
     - Only a small number of external dependencies
     - slf4j
-    - support-core-utils (Android builds only)
+    - androidx.legacy:legacy-support-core-utils (Android builds only)
 - Only a basic dependency graph is available, between projects and between source files and external libraries
     - Only one layer of a project references classes from other projects
     - Generates a deep and narrow graph, should be wider and have more independent paths

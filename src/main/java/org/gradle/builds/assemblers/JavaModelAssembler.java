@@ -1,5 +1,6 @@
 package org.gradle.builds.assemblers;
 
+import org.gradle.builds.generators.GeneratorVersions;
 import org.gradle.builds.model.*;
 
 public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaLibrary> {
@@ -9,7 +10,7 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
 
     @Override
     protected void library(Settings settings, Project project, JavaLibrary library) {
-        project.requires(slfj4);
+        project.requires(slf4j);
 
         JavaClass apiClass = library.getApiClass();
 
@@ -26,8 +27,8 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
 
     @Override
     protected void application(Settings settings, Project project, JavaApplication application) {
-        project.requires(slfj4);
-        project.requires(slfj4Simple);
+        project.requires(slf4j);
+        project.requires(slf4jSimple);
 
         JavaClass mainClass = application.addClass(project.getQualifiedNamespaceFor() + "." + project.getTypeNameFor());
         mainClass.addRole(new AppEntryPoint());
@@ -35,7 +36,7 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
         BuildScript buildScript = project.getBuildScript();
         buildScript.requirePlugin("application");
         addDependencies(project, application, buildScript);
-        buildScript.property("mainClassName", mainClass.getName());
+        buildScript.block("application").property("mainClass", mainClass.getName());
 
         addSource(project, application, mainClass, javaClass -> {
         });
@@ -49,28 +50,29 @@ public class JavaModelAssembler extends JvmModelAssembler<JavaApplication, JavaL
             buildScript.property("group", group);
             buildScript.property("version", version);
             if (project.getPublicationTarget().getHttpRepository() != null) {
-                buildScript.requirePlugin("maven");
-                ScriptBlock deployerBlock = buildScript.block("uploadArchives").block("repositories").block("mavenDeployer");
-                deployerBlock.statement(
-                        "repository(url: new URI('" + project.getPublicationTarget().getHttpRepository().getRootDir().toUri() + "'))");
-                buildScript.statement("task publish(dependsOn: uploadArchives)");
+                buildScript.requirePlugin("maven-publish");
+                ScriptBlock publishing = buildScript.block("publishing");
+                publishing.block("publications").statement("mavenJava(MavenPublication) { from components.java }");
+                ScriptBlock mavenRepo = publishing.block("repositories").block("maven");
+                mavenRepo.property("url", project.getPublicationTarget().getHttpRepository().getRootDir().toUri().toString());
+                mavenRepo.statement("allowInsecureProtocol = true");
             }
         }
     }
 
     private void addJavaVersion(JavaLibrary library, BuildScript buildScript) {
         if (library.getTargetJavaVersion() != null) {
-            buildScript.property("sourceCompatibility", library.getTargetJavaVersion());
+            buildScript.block("java").property("sourceCompatibility", library.getTargetJavaVersion());
         }
     }
 
     private void addDependencies(Project project, HasJavaSource<JavaLibraryApi> component, BuildScript buildScript) {
-        // Don't use Android libraries, only java libraries
+        // Don't use Android libraries, only Java libraries
         for (Dependency<Library<? extends JavaLibraryApi>> library : project.requiredLibraries(JavaLibraryApi.class)) {
             buildScript.dependsOn("implementation", library.getTarget().getDependency());
             component.uses(library.withTarget(library.getTarget().getApi()));
         }
 
-        buildScript.dependsOnExternal("testCompile", "junit:junit:4.12");
+        buildScript.dependsOnExternal("testImplementation", GeneratorVersions.JUNIT4);
     }
 }

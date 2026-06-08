@@ -3,6 +3,7 @@ plugins {
     id("groovy")
     id("application")
     alias(libs.plugins.kotlin.jvm)
+    id("build-builder.generator-versions")
 }
 
 repositories {
@@ -16,10 +17,6 @@ dependencies {
     implementation(libs.kotlin.stdlib)
 
     runtimeOnly(libs.slf4j.simple)
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_11
 }
 
 application {

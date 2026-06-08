@@ -138,7 +138,7 @@ public class JavaSourceGenerator extends ProjectFileGenerator {
             printWriter.println("// GENERATED SOURCE FILE");
             printWriter.println("package " + javaClass.getPackageName() + ";");
             printWriter.println();
-            printWriter.println("import android.support.test.runner.AndroidJUnit4;");
+            printWriter.println("import androidx.test.ext.junit.runners.AndroidJUnit4;");
             printWriter.println("import org.junit.runner.RunWith;");
             printWriter.println("import org.junit.Test;");
             printWriter.println();

@@ -13,7 +13,7 @@ public class HttpServerModelAssembler extends ComponentSpecificProjectConfigurer
     public void configure(Settings settings, Project project, HttpServerImplementation component) {
         BuildScript buildScript = project.getBuildScript();
         buildScript.requirePlugin("application");
-        buildScript.property("mainClassName", "org.gradle.example.http.RepoMain");
+        buildScript.block("application").property("mainClass", "org.gradle.example.http.RepoMain");
         for (int i = 0; i < component.getSourceBuilds().size(); i++) {
             Path path = component.getSourceBuilds().get(i);
             String publishTaskName = "publishV" + (i + 1);

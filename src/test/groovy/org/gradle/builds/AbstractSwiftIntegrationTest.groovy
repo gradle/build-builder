@@ -13,7 +13,4 @@ import spock.lang.IgnoreIf
  */
 @IgnoreIf(value = { os.macOs }, inherited = true)
 abstract class AbstractSwiftIntegrationTest extends AbstractIntegrationTest {
-    def setup() {
-        gradleVersion = "5.4.1"
-    }
 }

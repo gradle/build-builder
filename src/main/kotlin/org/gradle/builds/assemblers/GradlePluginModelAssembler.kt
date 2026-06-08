@@ -1,5 +1,6 @@
 package org.gradle.builds.assemblers
 
+import org.gradle.builds.generators.GeneratorVersions
 import org.gradle.builds.model.GradlePluginComponent
 import org.gradle.builds.model.JavaClass
 import org.gradle.builds.model.Project
@@ -9,8 +10,8 @@ class GradlePluginModelAssembler : ComponentSpecificProjectConfigurer<GradlePlug
     override fun configure(settings: Settings, project: Project, component: GradlePluginComponent) {
         val buildScript = project.buildScript
         buildScript.requirePlugin("java-gradle-plugin")
-        buildScript.jcenter()
-        buildScript.dependsOnExternal("testCompile", "junit:junit:4.12")
+        buildScript.mavenCentral()
+        buildScript.dependsOnExternal("testImplementation", GeneratorVersions.JUNIT4)
 
         val id = component.id!!
         val pos = id.lastIndexOf(".")

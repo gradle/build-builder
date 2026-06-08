@@ -45,6 +45,6 @@ public class AndroidComponent extends HasJavaSource<JvmLibraryApi> implements Ha
 
     @Override
     public int getMinHeapMegabytes() {
-        return 100;
+        return 2048;
     }
 }

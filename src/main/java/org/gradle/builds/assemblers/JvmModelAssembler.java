@@ -1,5 +1,6 @@
 package org.gradle.builds.assemblers;
 
+import org.gradle.builds.generators.GeneratorVersions;
 import org.gradle.builds.model.*;
 
 import java.util.Collections;
@@ -7,8 +8,8 @@ import java.util.function.Consumer;
 
 public abstract class JvmModelAssembler<A extends Component, L extends Component> extends LanguageSpecificProjectConfigurer<A, L> {
     private static final JavaLibraryApi slf4jApi = new JavaLibraryApi("slf4j", Collections.singletonList(JavaClassApi.method("org.slf4j.LoggerFactory", "getLogger(\"abc\")")));
-    static final PublishedLibrary<JavaLibraryApi> slfj4 = new PublishedLibrary<>("slf4j", new ExternalDependencyDeclaration("org.slf4j:slf4j-api:1.7.25"), slf4jApi);
-    static final PublishedLibrary<JavaLibraryApi> slfj4Simple = new PublishedLibrary<>("slf4j-simple", new ExternalDependencyDeclaration("org.slf4j:slf4j-simple:1.7.25"), new JavaLibraryApi("slaf4-simple", Collections.emptyList()));
+    static final PublishedLibrary<JavaLibraryApi> slf4j = new PublishedLibrary<>("slf4j", new ExternalDependencyDeclaration(GeneratorVersions.SLF4J_API), slf4jApi);
+    static final PublishedLibrary<JavaLibraryApi> slf4jSimple = new PublishedLibrary<>("slf4j-simple", new ExternalDependencyDeclaration(GeneratorVersions.SLF4J_SIMPLE), new JavaLibraryApi("slf4j-simple", Collections.emptyList()));
 
     public JvmModelAssembler(Class<A> applicationType, Class<L> libraryType) {
         super(applicationType, libraryType);
@@ -17,7 +18,7 @@ public abstract class JvmModelAssembler<A extends Component, L extends Component
     @Override
     protected void rootProject(Settings settings, Project rootProject) {
         BlockWithProjectTarget allProjects = rootProject.getBuildScript().allProjects();
-        allProjects.jcenter();
+        allProjects.mavenCentral();
         addIdePlugins(rootProject);
     }
 
