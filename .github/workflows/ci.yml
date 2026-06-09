@@ -20,7 +20,7 @@ jobs:
         with:
           java-version: '25'
           distribution: 'temurin'
-      - uses: swift-actions/setup-swift@v2
+      - uses: SwiftyLab/setup-swift@38f54a76b70d989321de9dc7c840618c08cf56e9 # v1.14.0
       - name: Install C++ Boost (headers + system runtime library)
         run: sudo apt-get update && sudo apt-get install -y libboost-dev libboost-system-dev
       - uses: android-actions/setup-android@v3
