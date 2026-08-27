@@ -17,6 +17,10 @@ dependencies {
     implementation(libs.jgit)
     implementation(libs.jspecify)
     implementation(libs.kotlin.stdlib)
+    // gradle/gradle's named performance test projects, moved over from that repository. Kept in
+    // Groovy on purpose: rewriting them at the same time as moving them would have put recorded
+    // performance baselines at risk for no benefit. See perf-projects/build.gradle.kts.
+    implementation(project(":perf-projects"))
 
     runtimeOnly(libs.slf4j.simple)
 }
@@ -30,6 +34,12 @@ application {
 // release, the class files target the build JVM (currently 25) and the launcher dies with
 // UnsupportedClassVersionError anywhere older.
 val distributionJvmTarget = 17
+
+java {
+    // Covers GroovyCompile, which is not a JavaCompile and so ignores `options.release` below.
+    sourceCompatibility = JavaVersion.toVersion(distributionJvmTarget)
+    targetCompatibility = JavaVersion.toVersion(distributionJvmTarget)
+}
 
 tasks.withType<JavaCompile>().configureEach {
     options.release = distributionJvmTarget
