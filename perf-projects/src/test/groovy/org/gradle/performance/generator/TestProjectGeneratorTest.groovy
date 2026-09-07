@@ -23,12 +23,32 @@ class TestProjectGeneratorTest extends Specification {
     @TempDir
     File temporaryFolder
 
-    def "generates project hierarchy with correct depth"() {
-        given:
-        def config = JavaTestProjectGenerator.LARGE_JAVA_MULTI_PROJECT_HIERARCHY.config
-        def generator = new TestProjectGenerator(config)
-        def outputDir = new File(temporaryFolder, "output").tap { mkdirs() }
+    /**
+     * A small project with the same *shape* as `largeJavaMultiProjectHierarchy` — nested to
+     * `projectDepth` levels, several subprojects, a few source files each.
+     *
+     * <p>These cases assert structure (nesting depth, subproject count, source files per project,
+     * which build files exist), all of it read back from `config`, so they do not need real scale.
+     * Using the production config generated 304,511 files four times over — about 1.2 million files
+     * and seven minutes per run, enough to destabilise the rest of the build. Byte-for-byte fidelity
+     * of the real projects is covered by diffing generated output against gradle/gradle, not here.
+     */
+    def config = new TestProjectGeneratorConfigurationBuilder("largeJavaMultiProjectHierarchy")
+        .withSourceFiles(2)
+        .withSubProjects(12)
+        .withProjectDepth(5)
+        .withDaemonMemory('2g')
+        .withCompilerMemory('512m')
+        .assembleChangeFile()
+        .create()
 
+    def generator = new TestProjectGenerator(config)
+
+    File getOutputDir() {
+        new File(temporaryFolder, "output").tap { mkdirs() }
+    }
+
+    def "generates project hierarchy with correct depth"() {
         when:
         generator.generate(outputDir)
 
@@ -38,7 +58,6 @@ class TestProjectGeneratorTest extends Specification {
 
         // Check project depth (should be 5 levels deep)
         def depthProject = rootDir.listFiles().find { it.name == "project0" }
-        def previousProject = ""
         for (int i = 0; i < config.projectDepth; i++) {
             depthProject = new File(depthProject, "sub${i}project0")
             assert depthProject.exists()
@@ -49,11 +68,6 @@ class TestProjectGeneratorTest extends Specification {
     }
 
     def "generates correct number of subprojects"() {
-        given:
-        def config = JavaTestProjectGenerator.LARGE_JAVA_MULTI_PROJECT_HIERARCHY.config
-        def generator = new TestProjectGenerator(config)
-        def outputDir = new File(temporaryFolder, "output").tap { mkdirs() }
-
         when:
         generator.generate(outputDir)
 
@@ -64,11 +78,6 @@ class TestProjectGeneratorTest extends Specification {
     }
 
     def "generates correct number of source files per project"() {
-        given:
-        def config = JavaTestProjectGenerator.LARGE_JAVA_MULTI_PROJECT_HIERARCHY.config
-        def generator = new TestProjectGenerator(config)
-        def outputDir = new File(temporaryFolder, "output").tap { mkdirs() }
-
         when:
         generator.generate(outputDir)
 
@@ -84,11 +93,6 @@ class TestProjectGeneratorTest extends Specification {
     }
 
     def "generates expected gradle files"() {
-        given:
-        def config = JavaTestProjectGenerator.LARGE_JAVA_MULTI_PROJECT_HIERARCHY.config
-        def generator = new TestProjectGenerator(config)
-        def outputDir = new File(temporaryFolder, "output").tap { mkdirs() }
-
         when:
         generator.generate(outputDir)
 
@@ -112,23 +116,6 @@ class TestProjectGeneratorTest extends Specification {
         sourceDir.eachFileRecurse { file ->
             if (file.isFile() && (file.name.endsWith(".java") || file.name.endsWith(".groovy") || file.name.endsWith(".kt"))) {
                 result << file
-            }
-        }
-        return result
-    }
-
-    private List<File> findAllProjectDirs(File rootDir) {
-        def result = [rootDir]
-        rootDir.listFiles().each { file ->
-            if (file.isDirectory() && file.name.startsWith("project")) {
-                result.add(file)
-                // Find nested projects
-                for (int i = 1; i <= 5; i++) {
-                    def nestedProject = new File(file, "sub${i}project" + file.name.substring(7))
-                    if (nestedProject.exists()) {
-                        result.add(nestedProject)
-                    }
-                }
             }
         }
         return result
