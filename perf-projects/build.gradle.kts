@@ -26,9 +26,31 @@ dependencies {
     // them (the root project's `Main`) need Groovy on their compile classpath too.
     api(libs.groovy)
     implementation(libs.groovy.json)
+}
 
-    testImplementation(libs.spock.core)
-    testImplementation(gradleTestKit())
+// `useSpock` rather than a bare `testImplementation(libs.spock.core)` plus `useJUnitPlatform()`:
+// the latter compiles but leaves no JUnit Platform engine on the runtime classpath, and the test
+// task dies with TestFrameworkNotAvailableException. Matches the root project's test suite.
+testing {
+    suites {
+        getByName<JvmTestSuite>("test") {
+            useSpock(libs.versions.spock)
+            dependencies {
+                // DeprecationInjectionIntegrationTest runs a real build against the generated project.
+                implementation(gradleTestKit())
+            }
+            targets {
+                all {
+                    testTask.configure {
+                        // The generated buildSrc is compiled by whatever JVM runs the TestKit build,
+                        // so the Gradle running it has to be new enough to instrument that bytecode.
+                        // Tracking the wrapper keeps this correct across wrapper bumps.
+                        systemProperty("testGradleVersion", gradle.gradleVersion)
+                    }
+                }
+            }
+        }
+    }
 }
 
 val distributionJvmTarget = 17
@@ -40,8 +62,4 @@ java {
 
 tasks.withType<JavaCompile>().configureEach {
     options.release = distributionJvmTarget
-}
-
-tasks.test {
-    useJUnitPlatform()
 }

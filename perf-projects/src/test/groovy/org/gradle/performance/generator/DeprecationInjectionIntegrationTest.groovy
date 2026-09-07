@@ -17,6 +17,7 @@
 package org.gradle.performance.generator
 
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.util.GradleVersion
 import spock.lang.Specification
 import spock.lang.TempDir
 
@@ -26,6 +27,13 @@ import spock.lang.TempDir
  * unchanged.
  */
 class DeprecationInjectionIntegrationTest extends Specification {
+    /**
+     * A short, stable TestKit home, shared with the other integration tests in this build. The
+     * default lives under the per-test temporary directory, where the transform cache path grows long
+     * enough that writing the instrumented buildSrc jar fails.
+     */
+    private static final File SHARED_TESTKIT_DIR = new File("build/tmp/tests/testkit").canonicalFile.tap { mkdirs() }
+
     @TempDir
     File tmpDir
 
@@ -50,6 +58,7 @@ class DeprecationInjectionIntegrationTest extends Specification {
             .withProjectDir(projectDir)
             .withArguments("help", "--warning-mode", "all")
             .withGradleVersion(gradleVersion)
+            .withTestKitDir(SHARED_TESTKIT_DIR)
             .forwardOutput()
             .build()
 
@@ -75,10 +84,13 @@ class DeprecationInjectionIntegrationTest extends Specification {
 
     /**
      * The emitted plugin calls {@code org.gradle.internal.deprecation.DeprecationLogger}, so this
-     * test only means anything against a Gradle version that still has it. Kept aligned with the
-     * version the other integration tests in this repository use.
+     * test only means anything against a Gradle version that still has it.
+     *
+     * <p>Supplied by the build as the version running it, rather than pinned: the generated
+     * {@code buildSrc} is compiled by whatever JVM runs the TestKit build, and an older Gradle fails
+     * to instrument that bytecode ("Failed to create Jar file ... instrumented-buildSrc.jar").
      */
     private static String getGradleVersion() {
-        return "9.0.0"
+        return System.getProperty("testGradleVersion") ?: GradleVersion.current().version
     }
 }
