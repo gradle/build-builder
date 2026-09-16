@@ -3,7 +3,7 @@ jgit = "7.7.1.202607240634-r"
 jspecify = "1.0.1"
 kotlin = "2.4.10"
 picocli = "4.7.7"
-slf4j = "2.0.18"
+slf4j = "2.0.19"
 spock = "2.4-groovy-4.0"
 
 # Versions for coordinates emitted by the generators into generated build.gradle files.
