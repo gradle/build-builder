@@ -44,10 +44,7 @@ class PerfProjects {
             config.repositories = [RepositoryDefinitions.mavenRepositoryDefinition(config.dsl, repositoryUrl)] as String[]
         }
 
-        AbstractTestProjectGenerator generator = config.dsl == GradleDsl.DECLARATIVE
-            ? new DeclarativeDslTestProjectGenerator(config)
-            : new TestProjectGenerator(config)
-        generator.generate(outputBaseDir)
+        new TestProjectGenerator(config).generate(outputBaseDir)
 
         File projectDir = new File(outputBaseDir, projectName)
         PerfProjectDescriptor.write(projectDir, config)
