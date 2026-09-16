@@ -1,5 +1,5 @@
 [versions]
-jgit = "7.7.1.202607240634-r"
+jgit = "7.8.0.202609011348-r"
 jspecify = "1.0.1"
 kotlin = "2.4.10"
 picocli = "4.7.7"
