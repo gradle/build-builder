@@ -4,3 +4,5 @@ plugins {
 }
 
 rootProject.name = "build-builder"
+
+include("perf-projects")

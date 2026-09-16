@@ -3,6 +3,7 @@ package org.gradle.builds;
 import org.gradle.builds.assemblers.*;
 import org.gradle.builds.generators.*;
 import org.gradle.builds.model.*;
+import org.gradle.performance.generator.PerfProjects;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.HelpCommand;
@@ -24,6 +25,7 @@ import java.util.concurrent.Callable;
                 Main.InitCppBuild.class,
                 Main.InitAndroidBuild.class,
                 Main.InitSwiftBuild.class,
+                Main.GeneratePerfProject.class,
                 HelpCommand.class
         }
 )
@@ -46,6 +48,56 @@ public class Main implements Runnable {
         new CommandLine(this)
                 .setExecutionExceptionHandler((ex, cmd, parseResult) -> { throw ex; })
                 .execute(args);
+    }
+
+    /**
+     * Generates one of gradle/gradle's named performance test projects.
+     *
+     * <p>These generators moved here from
+     * {@code testing/internal-performance-testing/.../org/gradle/performance/generator} in
+     * gradle/gradle. They do not share build-builder's own model: they produce specific,
+     * long-lived test projects whose generated content must stay stable, because performance
+     * results are keyed on the project name and any change in output resets recorded baselines.
+     */
+    @Command(
+            name = "perf-project",
+            description = "Generates a named gradle/gradle performance test project",
+            mixinStandardHelpOptions = true
+    )
+    public static class GeneratePerfProject implements Callable<Void> {
+        @CommandLine.Parameters(index = "0", arity = "0..1", description = "The performance test project to generate")
+        String projectName;
+
+        @Option(names = "--dir", description = "The directory to generate into (default: current directory)")
+        String rootDir = ".";
+
+        @Option(names = "--repository-url", description = "Repository to bake into the generated build scripts (default: Maven Central)")
+        String repositoryUrl;
+
+        @Option(names = "--list", description = "List the available project names and exit")
+        boolean list;
+
+        @Override
+        public Void call() throws Exception {
+            if (list || projectName == null) {
+                if (!list) {
+                    System.err.println("No project name given. Available projects:");
+                }
+                for (String name : new java.util.TreeSet<>(PerfProjects.projectNames())) {
+                    System.out.println(name);
+                }
+                if (!list) {
+                    throw new CommandLine.ParameterException(new CommandLine(this), "Missing required parameter: '<projectName>'");
+                }
+                return null;
+            }
+
+            File outputBaseDir = new File(rootDir).getCanonicalFile();
+            System.out.println("* Generating performance test project " + projectName + " in " + outputBaseDir);
+            File projectDir = PerfProjects.generate(projectName, outputBaseDir, repositoryUrl);
+            System.out.println("* Generated: " + projectDir);
+            return null;
+        }
     }
 
     public static abstract class InitBuild implements Callable<Void> {
