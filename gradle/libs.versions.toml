@@ -12,7 +12,7 @@ generator-androidx-legacy-support-core-utils = "1.0.0"
 generator-androidx-test-ext-junit = "1.2.1"
 generator-androidx-test-runner = "1.6.2"
 generator-junit4 = "4.13.2"
-generator-slf4j = "2.0.19"
+generator-slf4j = "2.0.20"
 
 [libraries]
 jgit = { module = "org.eclipse.jgit:org.eclipse.jgit", version.ref = "jgit" }
