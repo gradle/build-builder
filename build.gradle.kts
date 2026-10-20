@@ -64,7 +64,7 @@ val smokeTestInstalledDistribution by tasks.registering(Exec::class) {
     val launcher = layout.buildDirectory.file("install/${project.name}/bin/${project.name}")
     val generatedDir = layout.buildDirectory.dir("smoke-test/java")
 
-    inputs.file(launcher)
+    inputs.dir(tasks.installDist.map { it.destinationDir })
     outputs.dir(generatedDir)
 
     executable = launcher.get().asFile.absolutePath

@@ -94,7 +94,12 @@ public class Main implements Runnable {
 
             File outputBaseDir = new File(rootDir).getCanonicalFile();
             System.out.println("* Generating performance test project " + projectName + " in " + outputBaseDir);
-            File projectDir = PerfProjects.generate(projectName, outputBaseDir, repositoryUrl);
+            File projectDir;
+            try {
+                projectDir = PerfProjects.generate(projectName, outputBaseDir, repositoryUrl);
+            } catch (IllegalArgumentException e) {
+                throw new CommandLine.ParameterException(new CommandLine(this), e.getMessage(), e);
+            }
             System.out.println("* Generated: " + projectDir);
             return null;
         }

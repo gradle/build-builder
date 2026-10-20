@@ -16,12 +16,14 @@
 
 package org.gradle.performance.generator
 
+import groovy.transform.AutoClone
 import groovy.transform.CompileStatic
 import groovy.transform.builder.Builder
 import groovy.transform.builder.ExternalStrategy
 
 import static org.gradle.performance.generator.RepositoryDefinitions.mavenRepositoryDefinition
 
+@AutoClone
 @CompileStatic
 class TestProjectGeneratorConfiguration {
     String projectName

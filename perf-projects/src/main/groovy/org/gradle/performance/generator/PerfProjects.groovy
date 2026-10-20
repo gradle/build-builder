@@ -39,7 +39,7 @@ class PerfProjects {
                 "Unknown performance test project '${projectName}'. Known projects: ${projectNames().sort().join(', ')}")
         }
 
-        TestProjectGeneratorConfiguration config = project.config
+        TestProjectGeneratorConfiguration config = project.config.clone()
         if (repositoryUrl) {
             config.repositories = [RepositoryDefinitions.mavenRepositoryDefinition(config.dsl, repositoryUrl)] as String[]
         }
