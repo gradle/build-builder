@@ -18,7 +18,11 @@ jobs:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-java@v6.0.0
         with:
-          java-version: '25'
+          # 17 is the oldest JVM the installed distribution must run on; the smoke tests launch it
+          # there. Listed first so that 25, the build JVM, ends up as JAVA_HOME.
+          java-version: |
+            17
+            25
           distribution: 'temurin'
       - uses: SwiftyLab/setup-swift@38f54a76b70d989321de9dc7c840618c08cf56e9 # v1.14.0
       - name: Install C++ Boost (headers + system runtime library)
@@ -27,7 +31,7 @@ jobs:
         with:
           packages: 'platforms;android-34 build-tools;34.0.0'
       - uses: gradle/actions/setup-gradle@v6.3.0
-      - run: ./gradlew build
+      - run: ./gradlew build -Porg.gradle.java.installations.fromEnv=JAVA_HOME_17_X64
       - name: Upload test reports on failure
         if: failure()
         uses: actions/upload-artifact@v7

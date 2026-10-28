@@ -74,12 +74,6 @@ class TestProjectGeneratorConfiguration {
         'maxParallelForks'
     ])
 class TestProjectGeneratorConfigurationBuilder {
-    /**
-     * Repository baked into the generated build scripts. Overridable from the CLI via
-     * {@code --repository-url} so that a consumer can point generated projects at a mirror.
-     */
-    String repositoryUrl = RepositoryDefinitions.MAVEN_CENTRAL_URL
-
     TestProjectGeneratorConfigurationBuilder(String projectName, Language language = Language.JAVA) {
         this(projectName, projectName, language)
     }
@@ -134,7 +128,7 @@ class TestProjectGeneratorConfigurationBuilder {
         config.buildSrc = this.buildSrc
 
         config.plugins = this.language == Language.GROOVY ? ['groovy', 'java', 'eclipse', 'idea'] : ['java', 'eclipse', 'idea']
-        config.repositories = [mavenRepositoryDefinition(this.dsl, this.repositoryUrl)]
+        config.repositories = [mavenRepositoryDefinition(this.dsl)]
         config.externalApiDependencies = this.externalApiDependencies
         config.externalImplementationDependencies = [
             reflectasm: 'com.esotericsoftware:reflectasm:1.11.9',

@@ -79,6 +79,9 @@ public class Main implements Runnable {
 
         @Override
         public Void call() throws Exception {
+            if (list && projectName != null) {
+                throw new CommandLine.ParameterException(new CommandLine(this), "--list does not take a project name");
+            }
             if (list || projectName == null) {
                 if (!list) {
                     System.err.println("No project name given. Available projects:");

@@ -36,7 +36,10 @@ application {
 val distributionJvmTarget = 17
 
 java {
-    // Covers GroovyCompile, which is not a JavaCompile and so ignores `options.release` below.
+    // Sets the Groovy compiler's bytecode target. GroovyCompile has no working equivalent of
+    // `--release` — setting `options.release` on it is silently ignored, even for Java sources
+    // under src/main/groovy — so Groovy-compiled code is still checked against the build JVM's
+    // class library. Only JavaCompile, below, enforces the API level; keep Java in src/main/java.
     sourceCompatibility = JavaVersion.toVersion(distributionJvmTarget)
     targetCompatibility = JavaVersion.toVersion(distributionJvmTarget)
 }
@@ -51,36 +54,66 @@ kotlin {
     }
 }
 
-// gradle/gradle generates its Swift performance-test projects by running `bin/build-builder`
-// from the installed distribution (see `BuildBuilderGenerator` there). Nothing else in this
-// build exercises that path, so breakage in it — a wrong install task name, an unrunnable
-// class file version — only ever surfaces on the consumer's CI. Cover it here instead.
-val smokeTestInstalledDistribution by tasks.registering(Exec::class) {
-    description = "Runs the CLI from the installed distribution, the way gradle/gradle consumes it."
+// gradle/gradle runs `bin/build-builder` from the installed distribution: `BuildBuilderGenerator`
+// for its Swift performance-test projects, and `perf-project` for the named Java ones. Nothing else
+// in this build exercises that path, so breakage in it — a wrong install task name, Groovy missing
+// from the runtime classpath, an unrunnable class file version — only ever surfaces on the
+// consumer's CI. Cover it here instead, on the oldest JVM the distribution promises to run on.
+val smokeTestJvm = javaToolchains.launcherFor {
+    languageVersion = JavaLanguageVersion.of(distributionJvmTarget)
+}
+
+fun registerInstalledDistributionSmokeTest(
+    name: String,
+    description: String,
+    expectedOutput: String,
+    vararg cliArgs: String,
+) = tasks.register<Exec>(name) {
+    this.description = description
     group = LifecycleBasePlugin.VERIFICATION_GROUP
 
     dependsOn(tasks.installDist)
 
     val launcher = layout.buildDirectory.file("install/${project.name}/bin/${project.name}")
-    val generatedDir = layout.buildDirectory.dir("smoke-test/java")
+    val generatedDir = layout.buildDirectory.dir("smoke-test/$name")
+    val javaHome = smokeTestJvm.map { it.metadata.installationPath.asFile.absolutePath }
 
     inputs.dir(tasks.installDist.map { it.destinationDir })
+    inputs.property("javaVersion", distributionJvmTarget)
     outputs.dir(generatedDir)
 
     executable = launcher.get().asFile.absolutePath
-    args("java", "--projects", "3", "--source-files", "2", "--dir", generatedDir.get().asFile.absolutePath)
+    args(*cliArgs, "--dir", generatedDir.get().asFile.absolutePath)
 
-    val settingsFile = generatedDir.map { it.file("settings.gradle").asFile }
+    val expectedFile = generatedDir.map { it.file(expectedOutput).asFile }
+    doFirst {
+        // The launcher script picks its JVM from JAVA_HOME.
+        environment("JAVA_HOME", javaHome.get())
+    }
     doLast {
-        val settings = settingsFile.get()
-        check(settings.isFile) {
-            "The build-builder distribution exited successfully but generated no build: $settings is missing"
+        val expected = expectedFile.get()
+        check(expected.isFile) {
+            "The build-builder distribution exited successfully but generated no build: $expected is missing"
         }
     }
 }
 
+val smokeTestInstalledDistribution = registerInstalledDistributionSmokeTest(
+    "smokeTestInstalledDistribution",
+    "Runs the CLI from the installed distribution, the way gradle/gradle consumes it.",
+    "settings.gradle",
+    "java", "--projects", "3", "--source-files", "2",
+)
+
+val smokeTestInstalledPerfProject = registerInstalledDistributionSmokeTest(
+    "smokeTestInstalledPerfProject",
+    "Generates a named performance test project from the installed distribution.",
+    "smallJavaMultiProject/perf-project.json",
+    "perf-project", "smallJavaMultiProject",
+)
+
 tasks.check {
-    dependsOn(smokeTestInstalledDistribution)
+    dependsOn(smokeTestInstalledDistribution, smokeTestInstalledPerfProject)
 }
 
 testing {

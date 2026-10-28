@@ -60,6 +60,8 @@ java {
     targetCompatibility = JavaVersion.toVersion(distributionJvmTarget)
 }
 
+// Only JavaCompile enforces the API level (see the root build script), which is why Language.java
+// lives in src/main/java rather than next to the Groovy sources.
 tasks.withType<JavaCompile>().configureEach {
     options.release = distributionJvmTarget
 }
