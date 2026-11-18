@@ -62,7 +62,7 @@ public class CppModelAssembler extends LanguageSpecificProjectConfigurer<CppAppl
         buildScript.requirePlugin("cpp-application", "4.5");
         buildScript.requirePlugin("cpp-unit-test");
         addDependencies(project, app, buildScript);
-        maybeAddBoost(privateHeader, buildScript);
+        maybeAddBoost(privateHeader);
 
         addApiHeaders(app, implHeader);
         addSource(project, app, appClass, mainSourceFile, implHeader, privateHeader);
@@ -105,7 +105,7 @@ public class CppModelAssembler extends LanguageSpecificProjectConfigurer<CppAppl
         buildScript.requirePlugin("cpp-unit-test");
         addPublishing(project, project.getBuildScript());
         addDependencies(project, lib, buildScript);
-        maybeAddBoost(privateHeader, buildScript);
+        maybeAddBoost(privateHeader);
 
         addApiHeaders(lib, apiHeader);
         addSource(project, lib, apiClass, apiSourceFile, implHeader, privateHeader);
@@ -113,10 +113,9 @@ public class CppModelAssembler extends LanguageSpecificProjectConfigurer<CppAppl
         lib.setMacroIncludes(macroIncludes);
     }
 
-    private void maybeAddBoost(CppHeaderFile privateHeader, BuildScript buildScript) {
+    private void maybeAddBoost(CppHeaderFile privateHeader) {
         if (boost) {
             privateHeader.includeSystemHeader("boost/asio.hpp");
-            buildScript.block("tasks.withType(AbstractLinkTask)").statement("linkerArgs.add('-lboost_system')");
         }
     }
 

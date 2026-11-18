@@ -25,8 +25,8 @@ jobs:
             25
           distribution: 'temurin'
       - uses: SwiftyLab/setup-swift@d60245579ea3836a3f2fa65ebbe1e8891d577c76 # v1.14.2
-      - name: Install C++ Boost (headers + system runtime library)
-        run: sudo apt-get update && sudo apt-get install -y libboost-dev libboost-system-dev
+      - name: Install C++ Boost headers
+        run: sudo apt-get update && sudo apt-get install -y libboost-dev
       - uses: android-actions/setup-android@v4
         with:
           packages: 'platforms;android-34 build-tools;34.0.0'
