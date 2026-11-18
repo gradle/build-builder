@@ -1,5 +1,5 @@
 [versions]
-groovy = "4.0.32"
+groovy = "6.0.0"
 jgit = "7.8.0.202609011348-r"
 jspecify = "1.0.1"
 kotlin = "2.4.21"
