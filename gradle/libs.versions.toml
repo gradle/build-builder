@@ -1,6 +1,6 @@
 [versions]
 groovy = "4.0.32"
-jgit = "7.8.0.202609011348-r"
+jgit = "7.8.1.202611041320-r"
 jspecify = "1.0.1"
 kotlin = "2.4.21"
 picocli = "4.7.7"
