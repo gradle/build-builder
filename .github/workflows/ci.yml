@@ -16,7 +16,7 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v7.0.1
-      - uses: actions/setup-java@v6.2.0
+      - uses: actions/setup-java@v6.3.0
         with:
           # 17 is the oldest JVM the installed distribution must run on; the smoke tests launch it
           # there. Listed first so that 25, the build JVM, ends up as JAVA_HOME.
